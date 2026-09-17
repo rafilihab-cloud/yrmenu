@@ -1,74 +1,40 @@
-require('dotenv').config();
-const express = require('express');
-const mongoose = require('mongoose');
-
-const app = express();
-const PORT = process.env.PORT || 3000;
-
-app.use(express.static('public'));
-app.use(express.json());
-
-// رابط الاتصال بقاعدة البيانات
-const dbURI = process.env.MONGO_URI || "mongodb+srv://rafilihab_db_user:iOsatFqoINY1g5Jp@cluster0.je5q3pg.mongodb.net/menuDB?retryWrites=true&w=majority&appName=Cluster0";
-
-// الاتصال بقاعدة البيانات
-mongoose.connect(dbURI)
-  .then(() => console.log('✅ تم الاتصال بقاعدة بيانات MongoDB بنجاح!'))
-  .catch(err => console.error('❌ خطأ في الاتصال بقاعدة البيانات:', err));
-
-// هيكل بيانات المنيو (Schema)
-const menuItemSchema = new mongoose.Schema({
-  name: String,
-  desc: String,
-  price: String,
-  image: String
-});
-
-const categorySchema = new mongoose.Schema({
-  name: String,
-  items: [menuItemSchema]
-});
-
-const restaurantSchema = new mongoose.Schema({
-  restaurantName: String,
-  categories: [categorySchema]
-});
-
-const Restaurant = mongoose.model('Restaurant', restaurantSchema);
-
-// جلب بيانات المنيو أو إضافة بيانات افتراضية
-app.get('/api/menu', async (req, res) => {
+const seedDatabase = async () => {
   try {
-    let restaurant = await Restaurant.findOne();
-
-    if (!restaurant) {
-      restaurant = await Restaurant.create({
-        restaurantName: "نوفارة كافيه - Nawfara Cafe",
-        categories: [
+    await MenuItem.deleteMany({});
+    
+    await MenuItem.create([
+      {
+        category: "المشروبات الساخنة",
+        items: [
           {
-            name: "المشروبات الساخنة",
-            items: [
-              { name: "اسبريسو", desc: "قهوة مركزة غنية بالطعمة", price: "3,000 د.ع", image: "https://via.placeholder.com/80" },
-              { name: "كابتشينو", desc: "اسبريسو مع حليب مبخر ورغوة غنية", price: "4,500 د.ع", image: "https://via.placeholder.com/80" }
-            ]
+            name: "اسبريسو",
+            description: "قهوة مركزة غنية بالطعم",
+            price: 3000,
+            image: "images/espresso.jpg"
           },
           {
-            name: "الحلويات",
-            items: [
-              { name: "وافل شوكولاتة", desc: "وافل طازج مع نوتيلا وفواكه", price: "6,000 د.ع", image: "https://via.placeholder.com/80" }
-            ]
+            name: "كابتشينو",
+            description: "اسبريسو مع حليب مبخر ورغوة غنية",
+            price: 4500,
+            image: "images/cappuccino.jpg"
           }
         ]
-      });
-      console.log('📌 تم إنشاء منيو تجريبي في قاعدة البيانات لأول مرة');
-    }
+      },
+      {
+        category: "الحلويات",
+        items: [
+          {
+            name: "وافل شوكولاتة",
+            description: "وافل طازج مع نوتيلا وفواكه",
+            price: 6000,
+            image: "images/waffle.jpg"
+          }
+        ]
+      }
+    ]);
 
-    res.json(restaurant);
+    console.log("✅ تم تحديث بيانات المنيو بنجاح لـ YRmenu");
   } catch (err) {
-    res.status(500).json({ error: 'حدث خطأ في جلب البيانات' });
+    console.error("❌ خطأ في إضافة البيانات:", err);
   }
-});
-
-app.listen(PORT, () => {
-  console.log(`🚀 السيرفر شغال على: http://localhost:${PORT}`);
-});
+};

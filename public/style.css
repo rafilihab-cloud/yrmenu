@@ -1,136 +1,172 @@
+
+:root {
+  --primary-color: #0f172a;
+  --accent-color: #38bdf8;
+  --bg-color: #f8fafc;
+  --card-bg: #ffffff;
+  --text-main: #1e293b;
+  --text-muted: #64748b;
+  --border-radius: 16px;
+  --shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.05);
+}
+
 * {
   box-sizing: border-box;
-  font-family: 'Tajawal', sans-serif;
+  margin: 0;
+  padding: 0;
+  font-family: 'Cairo', sans-serif;
 }
 
 body {
-  background-color: #f8f9fa;
-  margin: 0;
-  padding: 0;
-  direction: rtl;
-  color: #2b2b2b;
+  background-color: var(--bg-color);
+  color: var(--text-main);
+  padding-bottom: 40px;
 }
 
-/* الهيدر واللوجو */
-.header-cover {
+/* Hero Banner & Logo */
+.hero-banner {
   height: 140px;
-  background: linear-gradient(135deg, #2c3e50, #4ca1af);
+  background: linear-gradient(135deg, #2c5364, #203a43, #0f2027);
   position: relative;
-  margin-bottom: 50px;
+  border-bottom-left-radius: 24px;
+  border-bottom-right-radius: 24px;
 }
 
 .logo-container {
   position: absolute;
-  bottom: -40px;
+  bottom: -35px;
   left: 50%;
   transform: translateX(-50%);
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  background: #ffffff;
+  padding: 4px;
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
 }
 
-.logo-container img {
-  width: 85px;
-  height: 85px;
+.restaurant-logo {
+  width: 100%;
+  height: 100%;
   border-radius: 50%;
-  border: 4px solid white;
-  box-shadow: 0 4px 10px rgba(0,0,0,0.15);
   object-fit: cover;
 }
 
-.container {
-  max-width: 480px;
-  margin: 0 auto;
-  padding: 0 15px;
-}
-
-h1 {
+/* Restaurant Info */
+.restaurant-info {
   text-align: center;
-  font-size: 22px;
+  margin-top: 45px;
   margin-bottom: 20px;
-  font-weight: 700;
+  padding: 0 16px;
 }
 
-/* شريط الأقسام الأفقي (Scroll) */
-.categories-tab {
+.restaurant-name {
+  font-size: 1.6rem;
+  font-weight: 800;
+  color: var(--primary-color);
+}
+
+/* Categories Filter Navigation */
+.categories-nav {
   display: flex;
   gap: 10px;
   overflow-x: auto;
-  padding-bottom: 10px;
-  margin-bottom: 20px;
-  scrollbar-width: none; /* إخفاء شريط التمرير */
+  padding: 8px 16px;
+  margin-bottom: 24px;
+  scrollbar-width: none;
 }
 
-.categories-tab::-webkit-scrollbar {
+.categories-nav::-webkit-scrollbar {
   display: none;
 }
 
-.tab-btn {
-  background: #ffffff;
+.category-btn {
+  background: var(--card-bg);
   border: 1px solid #e2e8f0;
-  padding: 8px 18px;
-  border-radius: 20px;
+  padding: 8px 20px;
+  border-radius: 30px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--text-muted);
   white-space: nowrap;
-  font-size: 14px;
-  font-weight: 500;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: all 0.25s ease;
 }
 
-.tab-btn.active {
-  background: #111827;
+.category-btn.active {
+  background: var(--primary-color);
   color: #ffffff;
-  border-color: #111827;
+  border-color: var(--primary-color);
+  box-shadow: 0 4px 12px rgba(15, 23, 42, 0.15);
 }
 
-/* كروت الوجبات */
+/* Menu Container & Cards */
+.menu-container {
+  max-width: 600px;
+  margin: 0 auto;
+  padding: 0 16px;
+}
+
 .category-title {
-  font-size: 18px;
-  margin: 25px 0 15px 0;
-  color: #111827;
+  font-size: 1.2rem;
   font-weight: 700;
+  color: var(--primary-color);
+  margin: 24px 0 12px 0;
 }
 
 .item-card {
-  background: #ffffff;
-  border-radius: 14px;
-  padding: 12px 15px;
+  background: var(--card-bg);
+  border-radius: var(--border-radius);
+  padding: 12px;
   margin-bottom: 12px;
   display: flex;
-  justify-content: space-between;
   align-items: center;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+  justify-content: space-between;
+  gap: 12px;
+  box-shadow: var(--shadow);
   border: 1px solid #f1f5f9;
 }
 
 .item-details {
   flex: 1;
-  padding-left: 10px;
 }
 
-.item-name {
-  margin: 0 0 4px 0;
-  font-size: 15px;
+.item-title {
+  font-size: 1rem;
   font-weight: 700;
+  color: var(--text-main);
+  margin-bottom: 4px;
 }
 
-.item-desc {
-  margin: 0 0 8px 0;
-  font-size: 12px;
-  color: #64748b;
+.item-description {
+  font-size: 0.82rem;
+  color: var(--text-muted);
   line-height: 1.4;
+  margin-bottom: 8px;
 }
 
 .item-price {
-  font-size: 14px;
   font-weight: 700;
-  color: #0f172a;
+  font-size: 0.9rem;
+  color: var(--primary-color);
   background: #f1f5f9;
-  padding: 4px 8px;
-  border-radius: 6px;
   display: inline-block;
+  padding: 4px 10px;
+  border-radius: 8px;
 }
 
-.item-image img {
-  width: 75px;
-  height: 75px;
-  border-radius: 10px;
+.item-image {
+  width: 85px;
+  height: 85px;
+  border-radius: 12px;
   object-fit: cover;
+  background-color: #f1f5f9;
+  flex-shrink: 0;
+}
+
+.loading-state {
+  text-align: center;
+  padding: 40px;
+  color: var(--text-muted);
+  font-weight: 600;
 }
