@@ -3,34 +3,53 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>YRmenu</title>
+  <title>YRmenu - Home</title>
   <link rel="stylesheet" href="style.css">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Tajawal:wght@400;500;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
-<body>
+<body class="home-page">
 
-  <!-- Banner Header -->
-  <header class="hero-banner">
-    <div class="logo-container">
-      <img src="images/logo.png" alt="YRmenu Logo" class="restaurant-logo" onerror="this.onerror=null; this.src='https://placehold.co/100x100/2c5364/ffffff?text=YRmenu';">
+  <!-- Header Section -->
+  <header class="home-header">
+    <button class="pill-btn">
+      <i class="fa-regular fa-comment-dots"></i> 
+      <span id="feedback-btn-text">Feedback</span>
+    </button>
+
+    <!-- Language Selector -->
+    <div class="lang-select-wrapper">
+      <i class="fa-solid fa-globe lang-icon"></i>
+      <select id="lang-select" class="pill-select">
+        <option value="ar">العربية</option>
+        <option value="en">English</option>
+      </select>
     </div>
   </header>
 
-  <!-- Restaurant Information -->
-  <section class="restaurant-info">
-    <h1 class="restaurant-name">YRmenu</h1>
-  </section>
+  <!-- Hero Content Section -->
+  <main class="hero-content">
+    <div class="hero-subtitle">START YOUR DAY WITH A SIP OF</div>
+    <h1 class="hero-title">V60</h1>
+    <div class="hero-tagline">SPECIALITY COFFEE</div>
 
-  <!-- Categories Filter Navigation -->
-  <nav class="categories-nav" id="categories-nav">
-    <!-- سيتم إضافة تصنيفات القائمة ديناميكياً -->
-  </nav>
+    <a href="menu.html" class="menu-action-btn">
+      <span id="menu-btn-text">المنيو</span>
+      <i class="fa-solid fa-border-all"></i>
+    </a>
 
-  <!-- Menu Display Section -->
-  <main class="menu-container" id="menu-container">
-    <div class="loading-state">جاري التحميل...</div>
+    <!-- Social Links -->
+    <div class="social-icons">
+      <a href="#" class="social-btn" aria-label="Facebook"><i class="fa-brands fa-facebook-f"></i></a>
+      <a href="#" class="social-btn" aria-label="Location"><i class="fa-solid fa-location-dot"></i></a>
+      <a href="#" class="social-btn" aria-label="Instagram"><i class="fa-brands fa-instagram"></i></a>
+      <a href="#" class="social-btn" aria-label="Phone"><i class="fa-solid fa-phone"></i></a>
+    </div>
+
+    <!-- Brand Footer -->
+    <div class="brand-badge">YRmenu</div>
   </main>
 
   <script src="app.js"></script>

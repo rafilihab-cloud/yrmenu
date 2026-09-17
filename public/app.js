@@ -1,113 +1,145 @@
+// 1. قاموس الترجمة الفوري للكلمات والأقسام والمنتجات
+const dictionary = {
+  // الأقسام
+  "الوجبات الرئيسية": "Main Meals",
+  "المشروبات": "Drinks",
+  
+  // المنتجات
+  "تشيكن برجر": "Chicken Burger",
+  "كلاسيك برجر": "Classic Burger",
+  "د.ع": "IQD",
+
+  // نصوص الواجهة الثابتة
+  "المنيو": "Menu",
+  "تقييم": "Feedback"
+};
+
+const translations = {
+  ar: { menuBtn: "المنيو", feedbackBtn: "تقييم", defaultMenuTitle: "المنيو" },
+  en: { menuBtn: "Menu", feedbackBtn: "Feedback", defaultMenuTitle: "Menu" }
+};
+
+let currentLang = localStorage.getItem('menu_lang') || 'ar';
+let menuCategoriesData = [];
+
 document.addEventListener('DOMContentLoaded', () => {
-  fetchMenuData();
+  currentLang = localStorage.getItem('menu_lang') || 'ar';
+  applyLanguage(currentLang);
+  setupLanguageDropdown();
+
+  const menuContainer = document.getElementById('menu-container');
+  if (menuContainer) {
+    fetchMenuData();
+  }
 });
 
-async function fetchMenuData() {
-  const menuContainer = document.getElementById('menu-container');
-  const categoriesNav = document.getElementById('categories-nav');
+function applyLanguage(lang) {
+  document.documentElement.dir = lang === 'ar' ? 'rtl' : 'ltr';
+  document.documentElement.lang = lang;
 
-  try {
-    const response = await fetch('/api/menu');
-    if (!response.ok) throw new Error('فشل جلب البيانات');
+  const menuBtnText = document.getElementById('menu-btn-text');
+  if (menuBtnText) menuBtnText.textContent = translations[lang].menuBtn;
 
-    let data = await response.json();
+  const feedbackBtnText = document.getElementById('feedback-btn-text');
+  if (feedbackBtnText) feedbackBtnText.textContent = translations[lang].feedbackBtn;
 
-    if (!data || (Array.isArray(data) && data.length === 0)) {
-      menuContainer.innerHTML = '<div class="loading-state">لا تتوفر عناصر حالياً.</div>';
-      return;
-    }
-
-    // تحويل البيانات لشكل موحد (أقسام ووجبات)
-    let formattedData = normalizeData(data);
-
-    renderCategoriesNav(formattedData, categoriesNav);
-    renderMenuItems(formattedData, menuContainer);
-
-  } catch (error) {
-    console.error('Error loading menu:', error);
-    menuContainer.innerHTML = '<div class="loading-state">حدث خطأ أثناء تحميل المنيو.</div>';
+  const titleElem = document.getElementById('current-category-title');
+  if (titleElem && (!menuCategoriesData || menuCategoriesData.length === 0)) {
+    titleElem.textContent = translations[lang].defaultMenuTitle;
   }
 }
 
-// دالة لتنظيم شكل البيانات مهما كان مصدرها
-function normalizeData(data) {
-  if (!Array.isArray(data)) data = [data];
-
-  // إذا كانت البيانات تحتوي مباشرة على حقل category و items
-  if (data[0] && data[0].category && Array.isArray(data[0].items)) {
-    return data;
+function setupLanguageDropdown() {
+  const langSelect = document.getElementById('lang-select');
+  if (langSelect) {
+    langSelect.value = currentLang;
+    langSelect.onchange = (e) => {
+      currentLang = e.target.value;
+      localStorage.setItem('menu_lang', currentLang);
+      applyLanguage(currentLang);
+    };
   }
+}
 
-  // إذا كانت البيانات عبارة عن قائمة وجبات مباشرة منفصلة
-  const categoriesMap = {};
+async function fetchMenuData() {
+  try {
+    const response = await fetch('/api/menu');
+    const data = await response.json();
 
-  data.forEach(item => {
-    const catName = item.category || 'القائمة الرئيسية';
-    if (!categoriesMap[catName]) {
-      categoriesMap[catName] = [];
-    }
-    categoriesMap[catName].push(item);
-  });
+    if (Array.isArray(data)) menuCategoriesData = data;
+    else if (Array.isArray(data.categories)) menuCategoriesData = data.categories;
+    else if (Array.isArray(data.data)) menuCategoriesData = data.data;
+    else menuCategoriesData = [];
 
-  return Object.keys(categoriesMap).map(catName => ({
-    category: catName,
-    items: categoriesMap[catName]
-  }));
+    const categoriesNav = document.getElementById('categories-nav');
+    if (categoriesNav) renderCategoriesNav(menuCategoriesData, categoriesNav);
+    if (menuCategoriesData.length > 0) displayCategoryItems(0);
+  } catch (error) {
+    console.error('Error loading menu:', error);
+  }
+}
+
+// دالة الترجمة التلقائية: تفحص الحقل الإنجليزي أولاً، ثم القاموس، ثم النص الأصلي
+function translateText(originalText, enField) {
+  if (currentLang === 'en') {
+    if (enField) return enField;
+    if (dictionary[originalText]) return dictionary[originalText];
+  }
+  return originalText || '';
 }
 
 function renderCategoriesNav(categories, container) {
   container.innerHTML = '';
+  if (!Array.isArray(categories)) return;
 
   categories.forEach((cat, index) => {
     const btn = document.createElement('button');
-    btn.className = `category-btn ${index === 0 ? 'active' : ''}`;
-    btn.textContent = cat.category;
-    btn.onclick = () => {
-      document.querySelectorAll('.category-btn').forEach(b => b.classList.remove('active'));
-      btn.classList.add('active');
+    btn.className = `category-item ${index === 0 ? 'active' : ''}`;
+    btn.dataset.index = index;
 
-      const targetSection = document.getElementById(`cat-${index}`);
-      if (targetSection) {
-        targetSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
-      }
-    };
+    btn.textContent = translateText(cat.name, cat.name_en);
+
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.category-item').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      displayCategoryItems(index);
+    });
+
     container.appendChild(btn);
   });
 }
 
-function renderMenuItems(categories, container) {
+function displayCategoryItems(categoryIndex) {
+  const container = document.getElementById('menu-container');
+  const titleElem = document.getElementById('current-category-title');
+  const category = menuCategoriesData[categoryIndex];
+
+  if (!category) return;
+
+  if (titleElem) {
+    titleElem.textContent = translateText(category.name, category.name_en);
+  }
+
   container.innerHTML = '';
+  const items = category.items || [];
 
-  categories.forEach((cat, index) => {
-    const categorySection = document.createElement('section');
-    categorySection.id = `cat-${index}`;
+  items.forEach(item => {
+    const card = document.createElement('div');
+    card.className = 'product-card';
 
-    const title = document.createElement('h2');
-    title.className = 'category-title';
-    title.textContent = cat.category;
-    categorySection.appendChild(title);
+    const itemName = translateText(item.name, item.name_en);
+    const itemDesc = translateText(item.description, item.description_en);
+    const itemPrice = translateText(item.price, null);
 
-    if (Array.isArray(cat.items)) {
-      cat.items.forEach(item => {
-        const card = document.createElement('div');
-        card.className = 'item-card';
+    card.innerHTML = `
+      <div class="product-info">
+        <h3 class="product-name">${itemName}</h3>
+        <p class="product-description">${itemDesc}</p>
+        <span class="product-price">${itemPrice}</span>
+      </div>
+      ${item.image ? `<img src="${item.image}" alt="${itemName}" class="product-image">` : ''}
+    `;
 
-        const fallbackImg = 'https://placehold.co/150x150/0f172a/ffffff?text=YRmenu';
-        const imageSrc = item.image || fallbackImg;
-
-        card.innerHTML = `
-          <div class="item-details">
-            <h3 class="item-title">${item.name || 'بدون اسم'}</h3>
-            <p class="item-description">${item.description || ''}</p>
-            <span class="item-price">${Number(item.price || 0).toLocaleString('ar-IQ')} د.ع</span>
-          </div>
-          <img src="${imageSrc}" alt="${item.name}" class="item-image" onerror="this.onerror=null; this.src='${fallbackImg}';">
-        `;
-
-        categorySection.appendChild(card);
-      });
-    }
-
-    container.appendChild(categorySection);
+    container.appendChild(card);
   });
 }
