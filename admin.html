@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <title>لوحة التحكم الشاملة - المنيو</title>
+  <style>
+    body { font-family: system-ui, sans-serif; background: #f8f9fa; margin: 0; padding: 20px; color: #333; }
+    .container { max-width: 1050px; margin: auto; }
+    .card { background: white; padding: 20px; border-radius: 10px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); margin-bottom: 25px; }
+    h2, h3 { margin-top: 0; }
+    .form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 10px; margin-bottom: 10px; align-items: center; }
+    input, textarea, select { padding: 10px; border: 1px solid #ccc; border-radius: 6px; font-size: 14px; width: 100%; box-sizing: border-box; }
+    button { cursor: pointer; padding: 10px 15px; border: none; border-radius: 6px; font-weight: bold; font-size: 14px; }
+    .btn-add { background: #27ae60; color: white; }
+    .btn-edit { background: #f39c12; color: white; margin-left: 5px; }
+    .btn-delete { background: #e74c3c; color: white; }
+    .cat-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #eee; padding-bottom: 10px; }
+    .cat-info { display: flex; align-items: center; gap: 12px; }
+    .cat-thumb { width: 50px; height: 50px; object-fit: cover; border-radius: 8px; border: 1px solid #ddd; }
+    .item-thumb { width: 40px; height: 40px; object-fit: cover; border-radius: 6px; border: 1px solid #ccc; }
+    .item-row { display: grid; grid-template-columns: 50px 2fr 2fr 1fr 2fr 1fr; gap: 10px; align-items: center; background: #fafafa; padding: 10px; border-radius: 6px; margin-top: 8px; border: 1px solid #eee; }
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <h1>⚙️ لوحة إدارة المنيو</h1>
+
+  <!-- إضافة قسم جديد مع صورة -->
+  <div class="card">
+    <h3>إضافة قسم جديد</h3>
+    <form id="add-cat-form" class="form-grid" enctype="multipart/form-data">
+      <input type="text" id="cat-ar" placeholder="اسم القسم (عربي)" required>
+      <input type="text" id="cat-en" placeholder="اسم القسم (إنجليزي)" required>
+      <input type="file" id="cat-image" accept="image/*">
+      <button type="submit" class="btn-add">إضافة قسم</button>
+    </form>
+  </div>
+
+  <!-- عرض الأقسام والمنتجات -->
+  <div id="dashboard-content">جاري تحميل البيانات...</div>
+</div>
+
+<script>
+  const API_URL = '/api';
+
+  async function loadAdminData() {
+    const res = await fetch(`${API_URL}/menu`);
+    const categories = await res.json();
+    const container = document.getElementById('dashboard-content');
+    container.innerHTML = '';
+
+    categories.forEach(cat => {
+      const catCard = document.createElement('div');
+      catCard.className = 'card';
+      catCard.innerHTML = `
+        <div class="cat-header">
+          <div class="cat-info">
+            ${cat.image ? `<img src="${cat.image}" class="cat-thumb" alt="${cat.name}">` : ''}
+            <div>
+              <strong>${cat.name}</strong> (${cat.name_en || 'بدون ترجمة'})
+            </div>
+          </div>
+          <div>
+            <button class="btn-edit" onclick="editCategory('${cat._id}', '${cat.name}', '${cat.name_en || ''}')">تعديل القسم</button>
+            <button class="btn-delete" onclick="deleteCategory('${cat._id}')">حذف القسم</button>
+          </div>
+        </div>
+
+        <h4 style="margin-top: 15px;">الأصناف داخل القسم:</h4>
+        <div id="items-${cat._id}">
+          ${cat.items.map(item => `
+            <div class="item-row">
+              <div>
+                ${item.image ? `<img src="${item.image}" class="item-thumb">` : '<small>لا صورة</small>'}
+              </div>
+              <input type="text" value="${item.name}" id="name-${item._id}">
+              <input type="text" value="${item.name_en || ''}" id="en-${item._id}" placeholder="إنجليزي">
+              <input type="text" value="${item.price}" id="price-${item._id}">
+              <input type="text" value="${item.description || ''}" id="desc-${item._id}" placeholder="الوصف">
+              <div>
+                <button class="btn-edit" onclick="updateItem('${cat._id}', '${item._id}')">حفظ</button>
+                <button class="btn-delete" onclick="deleteItem('${cat._id}', '${item._id}')">✕</button>
+              </div>
+            </div>
+          `).join('')}
+        </div>
+
+        <!-- إضافة صنف جديد مع صورة لهذا القسم -->
+        <div style="margin-top: 15px; background: #eef9f1; padding: 12px; border-radius: 6px;">
+          <small><b>+ إضافة صنف جديد لهذا القسم:</b></small>
+          <div class="form-grid" style="margin-top: 8px;">
+            <input type="text" id="new-item-ar-${cat._id}" placeholder="الاسم (عربي)">
+            <input type="text" id="new-item-en-${cat._id}" placeholder="الاسم (إنجليزي)">
+            <input type="text" id="new-item-price-${cat._id}" placeholder="السعر (مثال: 5,000 د.ع)">
+            <input type="text" id="new-item-desc-${cat._id}" placeholder="الوصف">
+            <input type="file" id="new-item-img-${cat._id}" accept="image/*">
+            <button class="btn-add" onclick="addItem('${cat._id}')">إضافة صنف</button>
+          </div>
+        </div>
+      `;
+      container.appendChild(catCard);
+    });
+  }
+
+  // إضافة قسم
+  document.getElementById('add-cat-form').onsubmit = async (e) => {
+    e.preventDefault();
+    const formData = new FormData();
+    formData.append('name', document.getElementById('cat-ar').value);
+    formData.append('name_en', document.getElementById('cat-en').value);
+    
+    const imageFile = document.getElementById('cat-image').files[0];
+    if (imageFile) formData.append('image', imageFile);
+
+    await fetch(`${API_URL}/categories`, { method: 'POST', body: formData });
+    e.target.reset();
+    loadAdminData();
+  };
+
+  // تعديل قسم
+  async function editCategory(id, currentAr, currentEn) {
+    const newName = prompt("اسم القسم بالعربي:", currentAr);
+    const newEn = prompt("اسم القسم بالإنجليزي:", currentEn);
+    if (newName) {
+      await fetch(`${API_URL}/categories/${id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name: newName, name_en: newEn })
+      });
+      loadAdminData();
+    }
+  }
+
+  // حذف قسم
+  async function deleteCategory(id) {
+    if (confirm("هل أنت تأكد من حذف القسم بكافة منتجاته؟")) {
+      await fetch(`${API_URL}/categories/${id}`, { method: 'DELETE' });
+      loadAdminData();
+    }
+  }
+
+  // إضافة صنف جديد مع صورة
+  async function addItem(catId) {
+    const name = document.getElementById(`new-item-ar-${catId}`).value;
+    const name_en = document.getElementById(`new-item-en-${catId}`).value;
+    const price = document.getElementById(`new-item-price-${catId}`).value;
+    const description = document.getElementById(`new-item-desc-${catId}`).value;
+    const imageFile = document.getElementById(`new-item-img-${catId}`).files[0];
+
+    if (!name || !price) return alert("الاسم والسعر مطلوبان!");
+
+    const formData = new FormData();
+    formData.append('name', name);
+    formData.append('name_en', name_en);
+    formData.append('price', price);
+    formData.append('description', description);
+    if (imageFile) formData.append('image', imageFile);
+
+    await fetch(`${API_URL}/categories/${catId}/items`, {
+      method: 'POST',
+      body: formData
+    });
+
+    loadAdminData();
+  }
+
+  // تعديل صنف
+  async function updateItem(catId, itemId) {
+    const body = {
+      name: document.getElementById(`name-${itemId}`).value,
+      name_en: document.getElementById(`en-${itemId}`).value,
+      price: document.getElementById(`price-${itemId}`).value,
+      description: document.getElementById(`desc-${itemId}`).value
+    };
+
+    await fetch(`${API_URL}/categories/${catId}/items/${itemId}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body)
+    });
+    alert("تم حفظ التعديلات بنجاح!");
+  }
+
+  // حذف صنف
+  async function deleteItem(catId, itemId) {
+    if (confirm("حذف هذا الصنف؟")) {
+      await fetch(`${API_URL}/categories/${catId}/items/${itemId}`, { method: 'DELETE' });
+      loadAdminData();
+    }
+  }
+
+  loadAdminData();
+</script>
+</body>
+</html>
