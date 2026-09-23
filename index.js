@@ -75,7 +75,7 @@ app.post('/api/login', (req, res) => {
 
   // اسم المستخدم وكلمة المرور الخاصة بلوحة التحكم
   const ADMIN_USER = "admin";
-  const ADMIN_PASS = "123456"; // يمكنك تعديلها لاحقاً كما تريد
+  const ADMIN_PASS = "admin123"; // يمكنك تعديلها لاحقاً كما تريد
 
   if (username === ADMIN_USER && password === ADMIN_PASS) {
     res.json({ success: true, message: "تم تسجيل الدخول بنجاح" });
