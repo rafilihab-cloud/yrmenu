@@ -27,7 +27,7 @@
     .cat-info { display: flex; align-items: center; gap: 12px; }
     .cat-thumb { width: 50px; height: 50px; object-fit: cover; border-radius: 8px; border: 1px solid #ddd; }
     .item-thumb { width: 40px; height: 40px; object-fit: cover; border-radius: 6px; border: 1px solid #ccc; }
-    .item-row { display: grid; grid-template-columns: 80px 2fr 2fr 1fr 2fr auto; gap: 10px; align-items: center; background: #fafafa; padding: 10px; border-radius: 6px; margin-top: 8px; border: 1px solid #eee; }
+    .item-row { display: grid; grid-template-columns: 110px 2fr 2fr 1fr 2fr auto; gap: 10px; align-items: center; background: #fafafa; padding: 10px; border-radius: 6px; margin-top: 8px; border: 1px solid #eee; }
     .preview-box { display: flex; gap: 15px; align-items: center; margin-top: 15px; background: #f0f0f0; padding: 10px; border-radius: 8px; flex-wrap: wrap; }
     .preview-img-container { text-align: center; }
     .preview-img { width: 60px; height: 60px; object-fit: cover; border-radius: 8px; border: 1px solid #ccc; display: block; margin: auto; }
@@ -207,7 +207,9 @@
           ${videoUrl ? `
             <div class="preview-img-container">
               <small>فيديو الرئيسية الحالي (MP4):</small><br>
-              <video src="${videoUrl}" style="width:120px; height:60px; border-radius:8px; object-fit:cover;" autoplay muted loop></video><br>
+              <video style="width:120px; height:60px; border-radius:8px; object-fit:cover;" autoplay muted loop playsinline>
+                <source src="${videoUrl}" type="video/mp4">
+              </video><br>
               <button type="button" class="btn-remove-img" onclick="deleteThemeImage('heroVideo')">حذف الفيديو</button>
             </div>` : ''}
         `;
@@ -328,7 +330,10 @@
               ${item.image ? `
                 <img src="${item.image}" class="item-thumb"><br>
                 <button type="button" class="btn-remove-img" onclick="deleteItemImage('${cat._id}', '${item._id}')">حذف</button>
-              ` : '<small>لا صورة</small>'}
+              ` : `
+                <small style="color:#888; display:block; margin-bottom:4px;">لا صورة</small>
+                <input type="file" id="item-img-file-${item._id}" accept="image/*" style="font-size:10px; padding:2px; width:100px;">
+              `}
             </div>
             <input type="text" value="${item.name || ''}" id="name-${item._id}" placeholder="الاسم (عربي)">
             <input type="text" value="${item.name_en || ''}" id="en-${item._id}" placeholder="إنجليزي">
@@ -366,11 +371,11 @@
           <div style="margin-top: 15px; background: #eef9f1; padding: 12px; border-radius: 6px;">
             <small><b>+ إضافة صنف جديد لهذا القسم:</b></small>
             <div class="form-grid" style="margin-top: 8px;">
-              <input type="text" id="new-item-ar-${cat._id}" placeholder="الاسم (عربي)">
-              <input type="text" id="new-item-en-${cat._id}" placeholder="الاسم (إنجليزي)">
-              <input type="text" id="new-item-price-${cat._id}" placeholder="السعر">
-              <input type="text" id="new-item-desc-${cat._id}" placeholder="الوصف">
-              <input type="file" id="new-item-img-${cat._id}" accept="image/*">
+              <input type="text" id="new-item-ar-${catId || cat._id}" placeholder="الاسم (عربي)">
+              <input type="text" id="new-item-en-${catId || cat._id}" placeholder="الاسم (إنجليزي)">
+              <input type="text" id="new-item-price-${catId || cat._id}" placeholder="السعر">
+              <input type="text" id="new-item-desc-${catId || cat._id}" placeholder="الوصف">
+              <input type="file" id="new-item-img-${catId || cat._id}" accept="image/*">
               <button class="btn-add" onclick="addItem('${cat._id}')">إضافة صنف</button>
             </div>
           </div>
@@ -499,22 +504,28 @@
   }
 
   async function updateItem(catId, itemId) {
-    const body = {
-      name: document.getElementById(`name-${itemId}`).value,
-      name_en: document.getElementById(`en-${itemId}`).value,
-      price: document.getElementById(`price-${itemId}`).value,
-      description: document.getElementById(`desc-${itemId}`).value
-    };
+    const formData = new FormData();
+    formData.append('name', document.getElementById(`name-${itemId}`).value);
+    formData.append('name_en', document.getElementById(`en-${itemId}`).value);
+    formData.append('price', document.getElementById(`price-${itemId}`).value);
+    formData.append('description', document.getElementById(`desc-${itemId}`).value);
+
+    // التحقق إذا كان حقل ملف الصورة موجوداً (عندما تكون الصورة فارغة ويختار المستخدم صورة جديدة)
+    const imgFileInput = document.getElementById(`item-img-file-${itemId}`);
+    if (imgFileInput && imgFileInput.files[0]) {
+      formData.append('image', imgFileInput.files[0]);
+    }
 
     try {
       const res = await fetch(`${API_URL}/categories/${catId}/items/${itemId}`, {
         method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(body)
+        body: formData
       });
       if (res.ok) {
         alert("تم حفظ التعديلات بنجاح!");
         loadAdminData();
+      } else {
+        alert("حدث خطأ أثناء التحديث.");
       }
     } catch (err) {
       console.error(err);
