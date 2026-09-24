@@ -366,11 +366,11 @@
           <div style="margin-top: 15px; background: #eef9f1; padding: 12px; border-radius: 6px;">
             <small><b>+ إضافة صنف جديد لهذا القسم:</b></small>
             <div class="form-grid" style="margin-top: 8px;">
-              <input type="text" id="new-item-ar-${catId}" placeholder="الاسم (عربي)">
-              <input type="text" id="new-item-en-${catId}" placeholder="الاسم (إنجليزي)">
-              <input type="text" id="new-item-price-${catId}" placeholder="السعر">
-              <input type="text" id="new-item-desc-${catId}" placeholder="الوصف">
-              <input type="file" id="new-item-img-${catId}" accept="image/*">
+              <input type="text" id="new-item-ar-${cat._id}" placeholder="الاسم (عربي)">
+              <input type="text" id="new-item-en-${cat._id}" placeholder="الاسم (إنجليزي)">
+              <input type="text" id="new-item-price-${cat._id}" placeholder="السعر">
+              <input type="text" id="new-item-desc-${cat._id}" placeholder="الوصف">
+              <input type="file" id="new-item-img-${cat._id}" accept="image/*">
               <button class="btn-add" onclick="addItem('${cat._id}')">إضافة صنف</button>
             </div>
           </div>
