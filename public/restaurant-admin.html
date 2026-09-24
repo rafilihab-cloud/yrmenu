@@ -1,0 +1,562 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>restaurant Dashboard admin</title>
+  <style>
+    :root {
+      --primary: #27ae60;
+      --secondary: #2c3e50;
+    }
+    body { font-family: system-ui, -apple-system, sans-serif; background: #f8f9fa; margin: 0; padding: 20px; color: #333; }
+    .container { max-width: 1050px; margin: auto; }
+    .card { background: white; padding: 20px; border-radius: 10px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); margin-bottom: 25px; }
+    h1, h2, h3, h4 { margin-top: 0; color: #1a1a1a; }
+    .form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 10px; margin-bottom: 10px; align-items: center; }
+    input, textarea, select { padding: 10px; border: 1px solid #ccc; border-radius: 6px; font-size: 14px; width: 100%; box-sizing: border-box; }
+    input[type="color"] { height: 42px; padding: 2px; cursor: pointer; }
+    button { cursor: pointer; padding: 10px 15px; border: none; border-radius: 6px; font-weight: bold; font-size: 14px; transition: opacity 0.2s; }
+    button:hover { opacity: 0.9; }
+    .btn-add { background: var(--primary); color: white; }
+    .btn-save { background: var(--secondary); color: white; }
+    .btn-edit { background: #f39c12; color: white; margin-left: 5px; }
+    .btn-delete { background: #e74c3c; color: white; }
+    .btn-remove-img { background: #c0392b; color: white; padding: 4px 8px; font-size: 11px; margin-top: 4px; border-radius: 4px; }
+    .cat-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #eee; padding-bottom: 10px; }
+    .cat-info { display: flex; align-items: center; gap: 12px; }
+    .cat-thumb { width: 50px; height: 50px; object-fit: cover; border-radius: 8px; border: 1px solid #ddd; }
+    .item-thumb { width: 40px; height: 40px; object-fit: cover; border-radius: 6px; border: 1px solid #ccc; }
+    .item-row { display: grid; grid-template-columns: 80px 2fr 2fr 1fr 2fr 120px auto; gap: 10px; align-items: center; background: #fafafa; padding: 10px; border-radius: 6px; margin-top: 8px; border: 1px solid #eee; }
+    .preview-box { display: flex; gap: 15px; align-items: center; margin-top: 15px; background: #f0f0f0; padding: 10px; border-radius: 8px; flex-wrap: wrap; }
+    .preview-img-container { text-align: center; }
+    .preview-img { width: 60px; height: 60px; object-fit: cover; border-radius: 8px; border: 1px solid #ccc; display: block; margin: auto; }
+    
+    /* تنسيق بطاقة تنبيه انتهاء الاشتراك */
+    .expiry-card { background: linear-gradient(135deg, #2c3e50, #34495e); color: white; display: flex; justify-content: space-between; align-items: center; border-right: 6px solid #e74c3c; }
+    .expiry-info h3 { color: #fff; margin-bottom: 5px; }
+    .expiry-date-badge { background: rgba(255, 255, 255, 0.15); padding: 8px 15px; border-radius: 6px; font-size: 16px; font-weight: bold; border: 1px solid rgba(255,255,255,0.2); }
+  </style>
+</head>
+<body>
+
+<!-- كود الحماية الفوري في بداية الصفحة -->
+<script>
+  if (localStorage.getItem('isRestaurantLoggedIn') !== 'true') {
+    window.location.href = 'restaurant-login.html';
+  }
+</script>
+
+<div class="container">
+  <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+    <h1>⚙️ لوحة إدارة المنيو (خاص بصاحب المطعم)</h1>
+    <button type="button" class="btn-delete" onclick="logout()" style="height: fit-content;">تسجيل الخروج</button>
+  </div>
+
+  <!-- بطاقة عرض تاريخ الاكسباير (انتهاء الاشتراك) -->
+  <div class="card expiry-card">
+    <div class="expiry-info">
+      <h3>⏳ حالة اشتراك ولحظة انتهاء الصلاحية</h3>
+      <p id="expiry-status-text" style="margin: 0; color: #ecf0f1; font-size: 14px;">جاري التحقق من تاريخ انتهاء الصلاحية...</p>
+    </div>
+    <div>
+      <div id="expiry-date-display" class="expiry-date-badge">--/--/----</div>
+    </div>
+  </div>
+
+  <!-- بطاقة تخصيص الثيمة والمظهر الموسعة -->
+  <div class="card" style="border-top: 4px solid var(--primary);">
+    <h3>🎨 تخصيص الهوية والمظهر الموسع (Theme Customization)</h3>
+    <form id="theme-form">
+      <div class="form-grid">
+        <div>
+          <label><small><b>اسم المطعم:</b></small></label>
+          <input type="text" id="res-name" placeholder="اسم المطعم">
+        </div>
+        <div>
+          <label><small><b>الوصف الفرعي (Tagline):</b></small></label>
+          <input type="text" id="res-tagline" placeholder="مثال: SPECIALITY COFFEE">
+        </div>
+        <div>
+          <label><small><b>اللون الرئيسي (Primary):</b></small></label>
+          <input type="color" id="primary-color" value="#0f2537">
+        </div>
+        <div>
+          <label><small><b>خلفية الصفحة (Secondary):</b></small></label>
+          <input type="color" id="secondary-color" value="#e5d5be">
+        </div>
+        <div>
+          <label><small><b>خلفية كارت المنتج (Card BG):</b></small></label>
+          <input type="color" id="card-bg-color" value="#d7c4a8">
+        </div>
+        <div>
+          <label><small><b>لون النص العام (Text Color):</b></small></label>
+          <input type="color" id="text-dark-color" value="#1f1912">
+        </div>
+      </div>
+
+      <!-- صف إضافي لتخصيص متقدم للألوان -->
+      <div class="form-grid" style="margin-top: 15px; border-top: 1px dashed #ddd; padding-top: 15px;">
+        <div>
+          <label><small><b>لون الهيدر/شريط التنقل:</b></small></label>
+          <input type="color" id="header-bg-color" value="#ffffff">
+        </div>
+        <div>
+          <label><small><b>لون العناوين (Headings):</b></small></label>
+          <input type="color" id="heading-color" value="#1a1a1a">
+        </div>
+        <div>
+          <label><small><b>لون حدود كروت المنتجات:</b></small></label>
+          <input type="color" id="card-border-color" value="#cccccc">
+        </div>
+        <div>
+          <label><small><b>لون نص الأزرار (Button Text):</b></small></label>
+          <input type="color" id="button-text-color" value="#ffffff">
+        </div>
+      </div>
+      
+      <div class="form-grid" style="margin-top: 15px;">
+        <div>
+          <label><small><b>شعار المطعم (Logo):</b></small></label>
+          <input type="file" id="logo-file" accept="image/*">
+        </div>
+        <div>
+          <label><small><b>غلاف المنيو (Banner):</b></small></label>
+          <input type="file" id="banner-file" accept="image/*">
+        </div>
+        <div>
+          <label><small><b>خلفية الرئيسية (صورة):</b></small></label>
+          <input type="file" id="hero-bg-file" accept="image/*">
+        </div>
+        <div>
+          <label><small><b>فيديو الرئيسية (MP4):</b></small></label>
+          <input type="file" id="hero-video-file" accept="video/mp4,video/*">
+        </div>
+        <div style="align-self: flex-end;">
+          <button type="submit" class="btn-save" style="width: 100%;">حفظ مظهر المنيو</button>
+        </div>
+      </div>
+      <div class="preview-box" id="theme-preview"></div>
+    </form>
+  </div>
+
+  <!-- إضافة قسم جديد -->
+  <div class="card">
+    <h3>إضافة قسم جديد</h3>
+    <form id="add-cat-form" class="form-grid">
+      <input type="text" id="cat-ar" placeholder="اسم القسم (عربي)" required>
+      <input type="text" id="cat-en" placeholder="اسم القسم (إنجليزي)">
+      <input type="file" id="cat-image" accept="image/*">
+      <button type="submit" class="btn-add">إضافة قسم</button>
+    </form>
+  </div>
+
+  <!-- عرض الأقسام والمنتجات -->
+  <div id="dashboard-content">جاري تحميل البيانات...</div>
+</div>
+
+<script>
+  const API_URL = '/api';
+
+  function logout() {
+    localStorage.removeItem('isRestaurantLoggedIn');
+    window.location.href = 'restaurant-login.html';
+  }
+
+  async function loadSettings() {
+    try {
+      const res = await fetch(`${API_URL}/settings?t=${new Date().getTime()}`);
+      if (!res.ok) throw new Error('فشل جلب إعدادات المظهر');
+      const settings = await res.json();
+
+      if (settings) {
+        document.getElementById('res-name').value = settings.restaurantName || '';
+        document.getElementById('res-tagline').value = settings.restaurantTagline || settings.tagline || '';
+        document.getElementById('primary-color').value = settings.primaryColor || '#0f2537';
+        document.getElementById('secondary-color').value = settings.secondaryColor || '#e5d5be';
+        document.getElementById('card-bg-color').value = settings.cardBgColor || '#d7c4a8';
+        document.getElementById('text-dark-color').value = settings.textColor || '#1f1912';
+
+        // تعبئة الحقول الجديدة المتقدمة للألوان إذا كانت متوفرة في السيرفر
+        if(settings.headerBgColor) document.getElementById('header-bg-color').value = settings.headerBgColor;
+        if(settings.headingColor) document.getElementById('heading-color').value = settings.headingColor;
+        if(settings.cardBorderColor) document.getElementById('card-border-color').value = settings.cardBorderColor;
+        if(settings.buttonTextColor) document.getElementById('button-text-color').value = settings.buttonTextColor;
+
+        // معالجة وعرض تاريخ الاكسباير
+        const expiryDateStr = settings.expiresAt || settings.expiryDate || settings.expiry;
+        const expiryBadge = document.getElementById('expiry-date-display');
+        const expiryStatusText = document.getElementById('expiry-status-text');
+
+        if (expiryDateStr) {
+          const expiryDate = new Date(expiryDateStr);
+          const currentDate = new Date();
+          
+          expiryBadge.textContent = expiryDate.toLocaleDateString('ar-EG', {
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric'
+          });
+
+          const diffTime = expiryDate - currentDate;
+          const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+          if (diffDays < 0) {
+            expiryStatusText.innerHTML = '<span style="color: #ff6b6b; font-weight: bold;">⚠️ انتهت صلاحية الاشتراك بالفعل! يرجى التجديد.</span>';
+          } else if (diffDays <= 7) {
+            expiryStatusText.innerHTML = `<span style="color: #f1c40f; font-weight: bold;">⚠️ تنبيه: متبقي ${diffDays} أيام فقط على انتهاء الاشتراك!</span>`;
+          } else {
+            expiryStatusText.textContent = `حسابك نشط. متبقي حتى موعد التجديد القادم حوالي ${diffDays} يوم.`;
+          }
+        } else {
+          expiryBadge.textContent = 'غير متوفر';
+          expiryStatusText.textContent = 'لم يتم تحديد تاريخ انتهاء الصلاحية من قبل الإدارة.';
+        }
+
+        const videoUrl = settings.heroVideoUrl || (settings.heroBgUrl && settings.heroBgUrl.endsWith('.mp4') ? settings.heroBgUrl : null);
+
+        const previewBox = document.getElementById('theme-preview');
+        previewBox.innerHTML = `
+          ${settings.logoUrl ? `
+            <div class="preview-img-container">
+              <small>الشعار الحالي:</small><br>
+              <img src="${settings.logoUrl}" class="preview-img">
+              <button type="button" class="btn-remove-img" onclick="deleteThemeImage('logo')">حذف الشعار</button>
+            </div>` : ''}
+          ${settings.bannerUrl ? `
+            <div class="preview-img-container">
+              <small>الغلاف الحالي:</small><br>
+              <img src="${settings.bannerUrl}" class="preview-img" style="width:120px;">
+              <button type="button" class="btn-remove-img" onclick="deleteThemeImage('banner')">حذف الغلاف</button>
+            </div>` : ''}
+          ${settings.heroBgUrl && !settings.heroBgUrl.endsWith('.mp4') ? `
+            <div class="preview-img-container">
+              <small>خلفية الرئيسية الحالية:</small><br>
+              <img src="${settings.heroBgUrl}" class="preview-img" style="width:120px;">
+              <button type="button" class="btn-remove-img" onclick="deleteThemeImage('heroBg')">حذف الخلفية</button>
+            </div>` : ''}
+          ${videoUrl ? `
+            <div class="preview-img-container">
+              <small>فيديو الرئيسية الحالي:</small><br>
+              <video src="${videoUrl}" style="width:120px; height:60px; border-radius:8px; object-fit:cover;" autoplay loop muted></video><br>
+              <button type="button" class="btn-remove-img" onclick="deleteThemeImage('heroVideo')">حذف الفيديو</button>
+            </div>` : ''}
+        `;
+      }
+    } catch (err) {
+      console.error("فشل تحميل الإعدادات:", err);
+      document.getElementById('expiry-status-text').textContent = 'تعذر جلب بيانات تاريخ الانتهاء.';
+    }
+  }
+
+  document.getElementById('theme-form').onsubmit = async (e) => {
+    e.preventDefault();
+    const formData = new FormData();
+    formData.append('restaurantName', document.getElementById('res-name').value);
+    formData.append('restaurantTagline', document.getElementById('res-tagline').value);
+    formData.append('tagline', document.getElementById('res-tagline').value);
+    formData.append('primaryColor', document.getElementById('primary-color').value);
+    formData.append('secondaryColor', document.getElementById('secondary-color').value);
+    formData.append('cardBgColor', document.getElementById('card-bg-color').value);
+    formData.append('textColor', document.getElementById('text-dark-color').value);
+
+    // تضمين الألوان المتقدمة الجديدة وإرسالها للسيرفر
+    formData.append('headerBgColor', document.getElementById('header-bg-color').value);
+    formData.append('headingColor', document.getElementById('heading-color').value);
+    formData.append('cardBorderColor', document.getElementById('card-border-color').value);
+    formData.append('buttonTextColor', document.getElementById('button-text-color').value);
+
+    const logo = document.getElementById('logo-file').files[0];
+    const banner = document.getElementById('banner-file').files[0];
+    const heroBg = document.getElementById('hero-bg-file').files[0];
+    const heroVideo = document.getElementById('hero-video-file').files[0];
+
+    if (logo) formData.append('logo', logo);
+    if (banner) formData.append('banner', banner);
+    if (heroBg) formData.append('heroBg', heroBg);
+    if (heroVideo) formData.append('heroVideo', heroVideo);
+
+    try {
+      const res = await fetch(`${API_URL}/settings`, { method: 'POST', body: formData });
+      if (res.ok) {
+        alert("تم حفظ المظهر وتخصيص الألوان بنجاح!");
+        document.getElementById('logo-file').value = '';
+        document.getElementById('banner-file').value = '';
+        document.getElementById('hero-bg-file').value = '';
+        document.getElementById('hero-video-file').value = '';
+        loadSettings();
+      } else {
+        alert("حدث خطأ أثناء حفظ البيانات بالسيرفر.");
+      }
+    } catch (err) {
+      console.error(err);
+      alert("تعذر الاتصال بالسيرفر!");
+    }
+  };
+
+  async function deleteThemeImage(type) {
+    let typeName = 'الصورة';
+    if (type === 'logo') typeName = 'الشعار';
+    else if (type === 'banner') typeName = 'الغلاف';
+    else if (type === 'heroBg') typeName = 'خلفية الصفحة الرئيسية';
+    else if (type === 'heroVideo') typeName = 'فيديو الصفحة الرئيسية';
+
+    if (confirm(`هل أنت تأكد من حذف ${typeName}؟`)) {
+      try {
+        const res = await fetch(`${API_URL}/settings/image/${type}`, { method: 'DELETE' });
+        if (res.ok) {
+          alert("تم الحذف بنجاح!");
+          loadSettings();
+        }
+      } catch (err) {
+        console.error(err);
+      }
+    }
+  }
+
+  async function loadAdminData() {
+    try {
+      const res = await fetch(`${API_URL}/menu?t=${new Date().getTime()}`);
+      if (!res.ok) throw new Error('فشل جلب البيانات');
+      const categories = await res.json();
+      const container = document.getElementById('dashboard-content');
+      container.innerHTML = '';
+
+      if (categories.length === 0) {
+        container.innerHTML = '<div class="card"><p>لا توجد أقسام حالياً. قم بإضافة قسم جديد أعلاه.</p></div>';
+        return;
+      }
+
+      categories.forEach(cat => {
+        const catCard = document.createElement('div');
+        catCard.className = 'card';
+
+        const itemsHTML = (cat.items || []).map(item => `
+          <div class="item-row">
+            <div style="text-align:center;">
+              ${item.image ? `
+                <img src="${item.image}" class="item-thumb"><br>
+                <button type="button" class="btn-remove-img" onclick="deleteItemImage('${cat._id}', '${item._id}')">حذف</button>
+              ` : '<small>لا صورة</small>'}
+            </div>
+            <input type="text" value="${item.name || ''}" id="name-${item._id}" placeholder="الاسم (عربي)">
+            <input type="text" value="${item.name_en || ''}" id="en-${item._id}" placeholder="إنجليزي">
+            <input type="text" value="${item.price || ''}" id="price-${item._id}" placeholder="السعر">
+            <input type="text" value="${item.description || ''}" id="desc-${item._id}" placeholder="الوصف">
+            <div>
+              <input type="file" id="item-img-${item._id}" accept="image/*" style="font-size: 11px; padding: 4px;">
+            </div>
+            <div style="display: flex;">
+              <button class="btn-edit" onclick="updateItem('${cat._id}', '${item._id}')">حفظ</button>
+              <button class="btn-delete" onclick="deleteItem('${cat._id}', '${item._id}')">✕</button>
+            </div>
+          </div>
+        `).join('');
+
+        catCard.innerHTML = `
+          <div class="cat-header">
+            <div class="cat-info">
+              ${cat.image ? `
+                <div style="text-align:center;">
+                  <img src="${cat.image}" class="cat-thumb" alt="${cat.name}"><br>
+                  <button type="button" class="btn-remove-img" onclick="deleteCategoryImage('${cat._id}')">حذف</button>
+                </div>
+              ` : '<div style="font-size:12px; color:#888; background:#eee; padding:8px 12px; border-radius:6px;">بدون صورة</div>'}
+              <div>
+                <strong>${cat.name}</strong> (${cat.name_en || 'بدون ترجمة'})
+              </div>
+            </div>
+            <div>
+              <button class="btn-edit" onclick="editCategory('${cat._id}', '${cat.name}', '${cat.name_en || ''}')">تعديل القسم</button>
+              <button class="btn-delete" onclick="deleteCategory('${cat._id}')">حذف القسم</button>
+            </div>
+          </div>
+
+          <h4 style="margin-top: 15px;">الأصناف داخل القسم:</h4>
+          <div id="items-${cat._id}">${itemsHTML}</div>
+
+          <div style="margin-top: 15px; background: #eef9f1; padding: 12px; border-radius: 6px;">
+            <small><b>+ إضافة صنف جديد لهذا القسم:</b></small>
+            <div class="form-grid" style="margin-top: 8px;">
+              <input type="text" id="new-item-ar-${cat._id}" placeholder="الاسم (عربي)">
+              <input type="text" id="new-item-en-${cat._id}" placeholder="الاسم (إنجليزي)">
+              <input type="text" id="new-item-price-${cat._id}" placeholder="السعر">
+              <input type="text" id="new-item-desc-${cat._id}" placeholder="الوصف">
+              <input type="file" id="new-item-img-${cat._id}" accept="image/*">
+              <button class="btn-add" onclick="addItem('${cat._id}')">إضافة صنف</button>
+            </div>
+          </div>
+        `;
+        container.appendChild(catCard);
+      });
+    } catch (err) {
+      console.error(err);
+      document.getElementById('dashboard-content').innerHTML = '<p style="color:red;">حدث خطأ أثناء تحميل البيانات.</p>';
+    }
+  }
+
+  document.getElementById('add-cat-form').onsubmit = async (e) => {
+    e.preventDefault();
+    const formData = new FormData();
+    formData.append('name', document.getElementById('cat-ar').value);
+    formData.append('name_en', document.getElementById('cat-en').value);
+    
+    const imageFile = document.getElementById('cat-image').files[0];
+    if (imageFile) formData.append('image', imageFile);
+
+    try {
+      const res = await fetch(`${API_URL}/categories`, { method: 'POST', body: formData });
+      if (res.ok) {
+        e.target.reset();
+        loadAdminData();
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  async function editCategory(id, currentAr, currentEn) {
+    const newName = prompt("اسم القسم بالعربي:", currentAr);
+    if (newName === null) return;
+    const newEn = prompt("اسم القسم بالإنجليزي:", currentEn);
+    if (newEn === null) return;
+
+    const imageInput = document.createElement('input');
+    imageInput.type = 'file';
+    imageInput.accept = 'image/*';
+
+    imageInput.onchange = async e => {
+      const file = e.target.files[0];
+      const formData = new FormData();
+      formData.append('name', newName);
+      formData.append('name_en', newEn);
+      if (file) formData.append('image', file);
+
+      try {
+        const res = await fetch(`${API_URL}/categories/${id}`, {
+          method: 'PUT',
+          body: formData
+        });
+        if (res.ok) {
+          alert("تم تعديل القسم وتحديث الصورة بنجاح!");
+          loadAdminData();
+        } else {
+          alert("حدث خطأ أثناء التحديث.");
+        }
+      } catch (err) {
+        console.error(err);
+      }
+    };
+
+    if (confirm("هل تريد اختيار أو تغيير صورة لهذا القسم؟\nاضغط 'موافق' لاختيار صورة جديدة، أو 'إلغاء' لتحديث النصوص فقط.")) {
+      imageInput.click();
+    } else {
+      const formData = new FormData();
+      formData.append('name', newName);
+      formData.append('name_en', newEn);
+
+      try {
+        const res = await fetch(`${API_URL}/categories/${id}`, {
+          method: 'PUT',
+          body: formData
+        });
+        if (res.ok) {
+          alert("تم تحديث بيانات القسم بنجاح!");
+          loadAdminData();
+        } else {
+          alert("حدث خطأ أثناء التحديث.");
+        }
+      } catch (err) {
+        console.error(err);
+      }
+    }
+  }
+
+  async function deleteCategory(id) {
+    if (confirm("هل أنت تأكد من حذف القسم بكافة منتجاته؟")) {
+      await fetch(`${API_URL}/categories/${id}`, { method: 'DELETE' });
+      loadAdminData();
+    }
+  }
+
+  async function deleteCategoryImage(catId) {
+    if (confirm("هل أنت تأكد من حذف صورة القسم؟")) {
+      await fetch(`${API_URL}/categories/${catId}/image`, { method: 'DELETE' });
+      loadAdminData();
+    }
+  }
+
+  async function addItem(catId) {
+    const name = document.getElementById(`new-item-ar-${catId}`).value;
+    const name_en = document.getElementById(`new-item-en-${catId}`).value;
+    const price = document.getElementById(`new-item-price-${catId}`).value;
+    const description = document.getElementById(`new-item-desc-${catId}`).value;
+    const imageFile = document.getElementById(`new-item-img-${catId}`).files[0];
+
+    if (!name || !price) return alert("الاسم والسعر مطلوبان!");
+
+    const formData = new FormData();
+    formData.append('name', name);
+    formData.append('name_en', name_en);
+    formData.append('price', price);
+    formData.append('description', description);
+    if (imageFile) formData.append('image', imageFile);
+
+    try {
+      const res = await fetch(`${API_URL}/categories/${catId}/items`, { method: 'POST', body: formData });
+      if (res.ok) loadAdminData();
+    } catch (err) {
+      console.error(err);
+    }
+  }
+
+  async function updateItem(catId, itemId) {
+    const formData = new FormData();
+    formData.append('name', document.getElementById(`name-${itemId}`).value);
+    formData.append('name_en', document.getElementById(`en-${itemId}`).value);
+    formData.append('price', document.getElementById(`price-${itemId}`).value);
+    formData.append('description', document.getElementById(`desc-${itemId}`).value);
+
+    const itemImageFile = document.getElementById(`item-img-${itemId}`).files[0];
+    if (itemImageFile) {
+      formData.append('image', itemImageFile);
+    }
+
+    try {
+      const res = await fetch(`${API_URL}/categories/${catId}/items/${itemId}`, {
+        method: 'PUT',
+        body: formData
+      });
+      if (res.ok) {
+        alert("تم حفظ التعديلات والصورة بنجاح!");
+        loadAdminData();
+      } else {
+        alert("حدث خطأ أثناء حفظ التعديلات.");
+      }
+    } catch (err) {
+      console.error(err);
+      alert("تعذر الاتصال بالسيرفر!");
+    }
+  }
+
+  async function deleteItem(catId, itemId) {
+    if (confirm("حذف هذا الصنف؟")) {
+      await fetch(`${API_URL}/categories/${catId}/items/${itemId}`, { method: 'DELETE' });
+      loadAdminData();
+    }
+  }
+
+  async function deleteItemImage(catId, itemId) {
+    if (confirm("هل أنت تأكد من حذف صورة هذا المنتج؟")) {
+      await fetch(`${API_URL}/categories/${catId}/items/${itemId}/image`, { method: 'DELETE' });
+      loadAdminData();
+    }
+  }
+
+  window.addEventListener('DOMContentLoaded', () => {
+    loadSettings();
+    loadAdminData();
+  });
+</script>
+</body>
+</html>
