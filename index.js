@@ -37,7 +37,7 @@ const SettingsSchema = new mongoose.Schema({
   bannerUrl: { type: String, default: '' },
   heroBgUrl: { type: String, default: '' },
   heroVideoUrl: { type: String, default: '' },
-  expiryDate: { type: String, default: '' },               // حقل تاريخ انتهاء الاشتراك
+  expiryDate: { type: String, default: '' },                 // حقل تاريخ انتهاء الاشتراك
   subscriptionStatus: { type: String, default: 'active' } // حقل حالة الاشتراك
 });
 
@@ -119,7 +119,7 @@ app.post('/api/settings', upload.fields([
     const { 
       restaurantName, 
       restaurantTagline, 
-      tagline,           
+      tagline,            
       primaryColor, 
       secondaryColor, 
       cardBgColor, 
@@ -258,7 +258,8 @@ app.post('/api/categories/:catId/items', upload.single('image'), async (req, res
   }
 });
 
-app.put('/api/categories/:catId/items/:itemId', async (req, res) => {
+// المسار المحدث لتعديل الصنف مع دعم استقبال الصور الجديدة
+app.put('/api/categories/:catId/items/:itemId', upload.single('image'), async (req, res) => {
   try {
     const { name, name_en, price, description } = req.body;
     const category = await Category.findById(req.params.catId);
@@ -270,6 +271,11 @@ app.put('/api/categories/:catId/items/:itemId', async (req, res) => {
     item.name_en = name_en;
     item.price = price;
     item.description = description;
+
+    // إذا تم رفع صورة جديدة مع التعديل
+    if (req.file) {
+      item.image = formatFileToBase64(req.file);
+    }
 
     await category.save();
     res.json(category);
@@ -290,16 +296,16 @@ app.delete('/api/categories/:catId/items/:itemId', async (req, res) => {
   }
 });
 
-app.delete('/api/categories/:catId/items/:itemId/image', async (Creq, res) => {
+app.delete('/api/categories/:catId/items/:itemId/image', async (req, res) => {
   try {
-    const category = await Category.findById(Creq.params.catId);
+    const category = await Category.findById(req.params.catId);
     if (!category) return res.status(404).json({ error: 'Category not found' });
 
-    const item = category.items.id(Creq.params.itemId);
+    const item = category.items.id(req.params.itemId);
     if (item) item.image = '';
 
     await category.save();
-    res.json({ success: `true` });
+    res.json({ success: true });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
