@@ -1,0 +1,453 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl" id="html-root">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>YRmenu - Feedback</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Tajawal:wght@400;500;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+  <style>
+    :root {
+      --primary: #0f2537;
+      --secondary: #e5d5be;
+      --card-bg: #ffffff;
+      --text-dark: #1f1912;
+      --heading-color: #1a1a1a;
+      --card-border: #e0e0e0;
+      --send-btn-bg: #e60023;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Tajawal', 'Plus Jakarta Sans', sans-serif;
+    }
+
+    body {
+      background-color: #f8f9fa;
+      color: var(--text-dark);
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+      justify-content: space-between;
+    }
+
+    .feedback-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 15px 20px;
+      background-color: #ffffff;
+      border-bottom: 1px solid #eee;
+    }
+
+    .back-btn {
+      color: #e60023;
+      font-size: 20px;
+      text-decoration: none;
+      display: flex;
+      align-items: center;
+    }
+
+    .header-title-text {
+      font-size: 16px;
+      font-weight: 600;
+      color: #666;
+      text-align: center;
+      flex-grow: 1;
+    }
+
+    /* تنسيق قائمة تغيير اللغة بدون أيقونة الكرة الأرضية */
+    .lang-selector-wrapper {
+      position: relative;
+      display: inline-flex;
+      align-items: center;
+    }
+
+    .lang-select {
+      background: #f1f2f3;
+      border: 1px solid #ddd;
+      border-radius: 20px;
+      font-size: 13px;
+      font-weight: 600;
+      color: #333;
+      padding: 6px 15px;
+      outline: none;
+      cursor: pointer;
+      appearance: none;
+      -webkit-appearance: none;
+    }
+
+    .feedback-container {
+      max-width: 800px;
+      width: 100%;
+      margin: 20px auto;
+      padding: 0 15px;
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+      flex-grow: 1;
+    }
+
+    .feedback-card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 12px;
+      padding: 20px;
+      text-align: center;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+    }
+
+    .feedback-label {
+      font-size: 14px;
+      font-weight: 600;
+      color: #444;
+      margin-bottom: 12px;
+    }
+
+    .stars-container {
+      display: flex;
+      justify-content: center;
+      gap: 8px;
+      direction: ltr;
+    }
+
+    .stars-container i {
+      font-size: 28px;
+      color: #ccc;
+      cursor: pointer;
+      transition: color 0.2s;
+    }
+
+    .stars-container i:hover,
+    .stars-container i.active {
+      color: #f39c12;
+    }
+
+    .emojis-container {
+      display: flex;
+      justify-content: center;
+      gap: 20px;
+      font-size: 32px;
+    }
+
+    .emoji-item {
+      cursor: pointer;
+      opacity: 0.4;
+      transform: scale(0.9);
+      transition: all 0.2s ease;
+      filter: grayscale(100%);
+    }
+
+    .emoji-item:hover,
+    .emoji-item.active {
+      opacity: 1;
+      transform: scale(1.15);
+      filter: grayscale(0%);
+    }
+
+    .feedback-input, .feedback-textarea {
+      width: 100%;
+      border: none;
+      background: transparent;
+      text-align: center;
+      font-size: 14px;
+      color: #333;
+      outline: none;
+    }
+
+    .feedback-input::placeholder, .feedback-textarea::placeholder {
+      color: #aaa;
+    }
+
+    .feedback-textarea {
+      resize: none;
+      height: 40px;
+    }
+
+    .send-section {
+      width: 100%;
+      background: #ffffff;
+      padding: 15px;
+      border-top: 1px solid #eee;
+      position: sticky;
+      bottom: 0;
+    }
+
+    .send-btn {
+      display: block;
+      width: 100%;
+      max-width: 800px;
+      margin: 0 auto;
+      background-color: var(--send-btn-bg);
+      color: #ffffff;
+      border: none;
+      border-radius: 8px;
+      padding: 14px;
+      font-size: 16px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: background 0.2s;
+      text-align: center;
+    }
+
+    .send-btn:hover {
+      background-color: #cc001f;
+    }
+  </style>
+</head>
+<body>
+
+  <header class="feedback-header">
+    <a href="menu.html" class="back-btn" id="back-link-btn" aria-label="Back">
+      <i class="fa-solid fa-arrow-right" id="back-icon"></i>
+    </a>
+    <div class="header-title-text" data-i18n="title">Feedback</div>
+    
+    <!-- قائمة تغيير اللغة بدون أيقونة الكرة الأرضية -->
+    <div class="lang-selector-wrapper">
+      <select id="langSwitch" class="lang-select">
+        <option value="ar">العربية</option>
+        <option value="en">English</option>
+      </select>
+    </div>
+  </header>
+
+  <main class="feedback-container">
+    
+    <!-- 1. Staff -->
+    <div class="feedback-card">
+      <div class="feedback-label" data-i18n="staff">Staff</div>
+      <div class="stars-container" data-rating-group="staff">
+        <i class="fa-regular fa-star" data-value="1"></i>
+        <i class="fa-regular fa-star" data-value="2"></i>
+        <i class="fa-regular fa-star" data-value="3"></i>
+        <i class="fa-regular fa-star" data-value="4"></i>
+        <i class="fa-regular fa-star" data-value="5"></i>
+      </div>
+    </div>
+
+    <!-- 2. Service -->
+    <div class="feedback-card">
+      <div class="feedback-label" data-i18n="service">Service</div>
+      <div class="stars-container" data-rating-group="service">
+        <i class="fa-regular fa-star" data-value="1"></i>
+        <i class="fa-regular fa-star" data-value="2"></i>
+        <i class="fa-regular fa-star" data-value="3"></i>
+        <i class="fa-regular fa-star" data-value="4"></i>
+        <i class="fa-regular fa-star" data-value="5"></i>
+      </div>
+    </div>
+
+    <!-- 3. Cleanliness & Hygiene -->
+    <div class="feedback-card">
+      <div class="feedback-label" data-i18n="cleanliness">Cleanliness & Hygiene</div>
+      <div class="stars-container" data-rating-group="cleanliness">
+        <i class="fa-regular fa-star" data-value="1"></i>
+        <i class="fa-regular fa-star" data-value="2"></i>
+        <i class="fa-regular fa-star" data-value="3"></i>
+        <i class="fa-regular fa-star" data-value="4"></i>
+        <i class="fa-regular fa-star" data-value="5"></i>
+      </div>
+    </div>
+
+    <!-- 4. Overall Experience -->
+    <div class="feedback-card">
+      <div class="feedback-label" data-i18n="experience">How was your overall experience ?</div>
+      <div class="emojis-container" id="emoji-group">
+        <span class="emoji-item" data-value="1">😫</span>
+        <span class="emoji-item" data-value="2">🙁</span>
+        <span class="emoji-item" data-value="3">😊</span>
+        <span class="emoji-item" data-value="4">😁</span>
+        <span class="emoji-item" data-value="5">🤩</span>
+      </div>
+    </div>
+
+    <!-- 5. Contact -->
+    <div class="feedback-card">
+      <div class="feedback-label" data-i18n="contact">Contact</div>
+      <input type="tel" class="feedback-input" id="contact-phone" data-i18n-placeholder="phone_placeholder" placeholder="Phone number">
+    </div>
+
+    <!-- 6. Additional comment -->
+    <div class="feedback-card">
+      <div class="feedback-label" data-i18n="comment_label">Any additional comment:</div>
+      <textarea class="feedback-textarea" id="feedback-comment" data-i18n-placeholder="comment_placeholder" placeholder="Click here to make comment"></textarea>
+    </div>
+
+  </main>
+
+  <div class="send-section">
+    <button class="send-btn" id="submit-feedback-btn" data-i18n="send_btn">Send</button>
+  </div>
+
+  <script>
+    // نصوص الترجمة للغتين العربية والإنجليزية
+    const translations = {
+      ar: {
+        title: "التقييم",
+        staff: "طاقم العمل",
+        service: "الخدمة",
+        cleanliness: "النظافة والتعقيم",
+        experience: "كيف كانت تجربتك العامة؟",
+        contact: "رقم التواصل",
+        phone_placeholder: "رقم الهاتف",
+        comment_label: "أي ملاحظات إضافية:",
+        comment_placeholder: "انقر هنا لكتابة ملاحظة",
+        send_btn: "إرسال",
+        sending: "جاري الإرسال...",
+        success_msg: "شكراً لك! تم إرسال تقييمك بنجاح.",
+        error_msg: "حدث خطأ أثناء إرسال التقييم، حاول مرة أخرى.",
+        server_error: "تعذر الاتصال بالخادم."
+      },
+      en: {
+        title: "Feedback",
+        staff: "Staff",
+        service: "Service",
+        cleanliness: "Cleanliness & Hygiene",
+        experience: "How was your overall experience ?",
+        contact: "Contact",
+        phone_placeholder: "Phone number",
+        comment_label: "Any additional comment:",
+        comment_placeholder: "Click here to make comment",
+        send_btn: "Send",
+        sending: "Sending...",
+        success_msg: "Thank you! Your feedback has been sent successfully.",
+        error_msg: "An error occurred while sending feedback. Please try again.",
+        server_error: "Could not connect to server."
+      }
+    };
+
+    // وظيفة تغيير النصوص بدون تغيير اتجاه الصفحة (ثابتة RTL)
+    function setLanguage(lang) {
+      const root = document.getElementById('html-root');
+      // تم تثبيت الاتجاه على العربية (rtl) ودعم لغة النصوص دون قلب التصميم
+      root.setAttribute('lang', lang);
+      localStorage.setItem('selectedLang', lang);
+
+      // تحديث النصوص بناءً على القاموس
+      document.querySelectorAll('[data-i18n]').forEach(el => {
+        const key = el.getAttribute('data-i18n');
+        if (translations[lang][key]) {
+          el.innerText = translations[lang][key];
+        }
+      });
+
+      // تحديث الحقول (Placeholders)
+      document.querySelectorAll('[data-i18n-placeholder]').forEach(el => {
+        const key = el.getAttribute('data-i18n-placeholder');
+        if (translations[lang][key]) {
+          el.placeholder = translations[lang][key];
+        }
+      });
+
+      // تحديث قائمة الاختيار لتتطابق مع اللغة الحالية
+      document.getElementById('langSwitch').value = lang;
+    }
+
+    // استدعاء اللغة المخزنة مسبقاً أو الافتراضية عند التحميل
+    document.addEventListener('DOMContentLoaded', () => {
+      const savedLang = localStorage.getItem('selectedLang') || 'ar';
+      setLanguage(savedLang);
+
+      // ربط حدث تغيير القائمة المنسدلة
+      document.getElementById('langSwitch').addEventListener('change', (e) => {
+        setLanguage(e.target.value);
+      });
+    });
+
+    // تخزين التقييمات المختارة
+    const ratings = {
+      staff: 0,
+      service: 0,
+      cleanliness: 0,
+      experience: 0
+    };
+
+    // تفاعل النجوم (Stars Rating Logic)
+    document.querySelectorAll('.stars-container').forEach(container => {
+      const groupName = container.getAttribute('data-rating-group');
+      const stars = container.querySelectorAll('i');
+      
+      stars.forEach(star => {
+        star.addEventListener('click', () => {
+          const value = parseInt(star.getAttribute('data-value'));
+          ratings[groupName] = value;
+
+          stars.forEach(s => {
+            const sVal = parseInt(s.getAttribute('data-value'));
+            if (sVal <= value) {
+              s.classList.remove('fa-regular');
+              s.classList.add('fa-solid', 'active');
+            } else {
+              s.classList.remove('fa-solid', 'active');
+              s.classList.add('fa-regular');
+            }
+          });
+        });
+      });
+    });
+
+    // تفاعل الوجوه التعبيرية (Emojis Selection Logic)
+    const emojis = document.querySelectorAll('.emoji-item');
+    emojis.forEach(emoji => {
+      emoji.addEventListener('click', () => {
+        emojis.forEach(e => e.classList.remove('active'));
+        emoji.classList.add('active');
+        ratings.experience = emoji.getAttribute('data-value');
+      });
+    });
+
+    // زر الإرسال الحقيقي (Send Action to Backend)
+    document.getElementById('submit-feedback-btn').addEventListener('click', async () => {
+      const currentLang = localStorage.getItem('selectedLang') || 'ar';
+      const phone = document.getElementById('contact-phone').value.trim();
+      const comment = document.getElementById('feedback-comment').value.trim();
+
+      const payload = {
+        staff: ratings.staff,
+        service: ratings.service,
+        cleanliness: ratings.cleanliness,
+        experience: ratings.experience,
+        phone: phone,
+        comment: comment
+      };
+
+      try {
+        const btn = document.getElementById('submit-feedback-btn');
+        btn.innerText = translations[currentLang].sending;
+        btn.disabled = true;
+
+        const response = await fetch('/api/feedback', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(payload)
+        });
+
+        const result = await response.json();
+
+        if (response.ok && result.success) {
+          alert(translations[currentLang].success_msg);
+          window.location.reload();
+        } else {
+          alert(translations[currentLang].error_msg);
+          btn.innerText = translations[currentLang].send_btn;
+          btn.disabled = false;
+        }
+      } catch (error) {
+        console.error('Error:', error);
+        alert(translations[currentLang].server_error);
+        const btn = document.getElementById('submit-feedback-btn');
+        btn.innerText = translations[currentLang].send_btn;
+        btn.disabled = false;
+      }
+    });
+  </script>
+</body>
+</html>
