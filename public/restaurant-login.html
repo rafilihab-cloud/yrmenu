@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl" id="html-root">
+<head>
+    <link rel="icon" type="image/png" sizes="32x32" href="images/logo1.png">
+    <link rel="apple-touch-icon" href="images/logo1.png">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title id="page-title">Login restaurant</title>
+    <style>
+        :root {
+          --primary: #27ae60;
+          --secondary: #2c3e50;
+        }
+        body {
+          font-family: system-ui, -apple-system, sans-serif;
+          background: #f8f9fa;
+          margin: 0;
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          height: 100vh;
+          color: #333;
+          position: relative;
+        }
+        .lang-container {
+          position: absolute;
+          top: 20px;
+          left: 20px;
+        }
+        .btn-lang {
+          background: #fff;
+          border: 1px solid #ccc;
+          padding: 6px 12px;
+          border-radius: 6px;
+          cursor: pointer;
+          font-weight: bold;
+          font-size: 13px;
+        }
+        .btn-lang:hover {
+          background: #eee;
+        }
+        .login-card {
+          background: white;
+          padding: 30px;
+          border-radius: 12px;
+          box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+          width: 100%;
+          max-width: 380px;
+          box-sizing: border-box;
+        }
+        h2 {
+          margin-top: 0;
+          margin-bottom: 20px;
+          color: #1a1a1a;
+          text-align: center;
+        }
+        .form-group {
+          margin-bottom: 15px;
+        }
+        label {
+          display: block;
+          margin-bottom: 6px;
+          font-size: 14px;
+          font-weight: bold;
+        }
+        input {
+          width: 100%;
+          padding: 11px;
+          border: 1px solid #ccc;
+          border-radius: 6px;
+          font-size: 14px;
+          box-sizing: border-box;
+        }
+        input:focus {
+          border-color: var(--primary);
+          outline: none;
+        }
+        .btn-login {
+          width: 100%;
+          padding: 12px;
+          background: var(--primary);
+          color: white;
+          border: none;
+          border-radius: 6px;
+          font-weight: bold;
+          font-size: 15px;
+          cursor: pointer;
+          transition: opacity 0.2s;
+          margin-top: 5px;
+        }
+        .btn-login:hover {
+          opacity: 0.9;
+        }
+        #error-msg {
+          color: #e74c3c;
+          font-size: 13px;
+          text-align: center;
+          margin-top: 12px;
+          display: none;
+        }
+      </style>
+</head>
+<body>
+
+<script>
+  // تطبيق اللغة المخزنة فوراً قبل تحميل العناصر لتجنب وميض تغير اللغة
+  (function() {
+    const savedLang = localStorage.getItem('menu_language') || 'ar';
+    const htmlRoot = document.getElementById('html-root');
+    if (savedLang === 'en') {
+      htmlRoot.setAttribute('lang', 'en');
+      htmlRoot.setAttribute('dir', 'ltr');
+    } else {
+      htmlRoot.setAttribute('lang', 'ar');
+      htmlRoot.setAttribute('dir', 'rtl');
+    }
+  })();
+</script>
+
+<div class="lang-container">
+  <button type="button" class="btn-lang" onclick="toggleLanguage()">English / عربي</button>
+</div>
+
+<div class="login-card">
+  <h2 id="login-title">🔐 دخول أصحاب المطاعم</h2>
+  <form id="login-form">
+    <div class="form-group">
+      <label for="username" id="label-user">اسم المستخدم:</label>
+      <input type="text" id="username" required placeholder="أدخل اسم المستخدم">
+    </div>
+    <div class="form-group">
+      <label for="password" id="label-pass">كلمة المرور:</label>
+      <input type="password" id="password" required placeholder="أدخل كلمة المرور">
+    </div>
+    <button type="submit" class="btn-login" id="btn-submit">تسجيل الدخول</button>
+    <div id="error-msg">اسم المستخدم أو كلمة المرور غير صحيحة</div>
+  </form>
+</div>
+
+<script>
+  const API_URL = '/api';
+
+  // النصوص الخاصة باللغتين
+  const translations = {
+    ar: {
+      pageTitle: "Login restaurant",
+      loginTitle: "🔐 دخول أصحاب المطاعم",
+      labelUser: "اسم المستخدم:",
+      labelPass: "كلمة المرور:",
+      userPlaceholder: "أدخل اسم المستخدم",
+      passPlaceholder: "أدخل كلمة المرور",
+      btnSubmit: "تسجيل الدخول",
+      errorText: "اسم المستخدم أو كلمة المرور غير صحيحة",
+      serverError: "حدث خطأ في الاتصال بالخادم."
+    },
+    en: {
+      pageTitle: "Restaurant Login",
+      loginTitle: "🔐 Restaurant Owner Login",
+      labelUser: "Username:",
+      labelPass: "Password:",
+      userPlaceholder: "Enter username",
+      passPlaceholder: "Enter password",
+      btnSubmit: "Login",
+      errorText: "Invalid username or password",
+      serverError: "An error occurred while connecting to the server."
+    }
+  };
+
+  function applyTranslations() {
+    const lang = localStorage.getItem('menu_language') || 'ar';
+    const t = translations[lang];
+
+    document.getElementById('page-title').textContent = t.pageTitle;
+    document.getElementById('login-title').textContent = t.loginTitle;
+    document.getElementById('label-user').textContent = t.labelUser;
+    document.getElementById('label-pass').textContent = t.labelPass;
+    document.getElementById('username').placeholder = t.userPlaceholder;
+    document.getElementById('password').placeholder = t.passPlaceholder;
+    document.getElementById('btn-submit').textContent = t.btnSubmit;
+    document.getElementById('error-msg').textContent = t.errorText;
+  }
+
+  function toggleLanguage() {
+    const currentLang = localStorage.getItem('menu_language') || 'ar';
+    const newLang = currentLang === 'ar' ? 'en' : 'ar';
+    localStorage.setItem('menu_language', newLang);
+
+    const htmlRoot = document.getElementById('html-root');
+    if (newLang === 'en') {
+      htmlRoot.setAttribute('lang', 'en');
+      htmlRoot.setAttribute('dir', 'ltr');
+    } else {
+      htmlRoot.setAttribute('lang', 'ar');
+      htmlRoot.setAttribute('dir', 'rtl');
+    }
+
+    applyTranslations();
+  }
+
+  // إذا كان صاحب المطعم مسجل الدخول مسبقاً، نوجهه مباشرة للوحة التحكم
+  if (localStorage.getItem('isRestaurantLoggedIn') === 'true') {
+    window.location.href = 'restaurant-admin.html';
+  }
+
+  // تطبيق الترجمات عند تحميل الصفحة
+  applyTranslations();
+
+  document.getElementById('login-form').onsubmit = async (e) => {
+    e.preventDefault();
+    const username = document.getElementById('username').value;
+    const password = document.getElementById('password').value;
+    const errorMsg = document.getElementById('error-msg');
+    const lang = localStorage.getItem('menu_language') || 'ar';
+
+    errorMsg.style.display = 'none';
+
+    try {
+      const res = await fetch(`${API_URL}/restaurant-login`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username, password })
+      });
+
+      if (res.ok) {
+        const data = await res.json();
+        // تخزين حالة الدخول الخاصة بلوحة المطعم
+        localStorage.setItem('isRestaurantLoggedIn', 'true');
+        if (data.token) {
+          localStorage.setItem('restaurantToken', data.token);
+        }
+        // الانتقال إلى لوحة التحكم (ستقرأ اللغة المحفوظة تلقائياً في الـ localStorage)
+        window.location.href = 'restaurant-admin.html';
+      } else {
+        errorMsg.style.display = 'block';
+      }
+    } catch (err) {
+      console.error(err);
+      errorMsg.textContent = translations[lang].serverError;
+      errorMsg.style.display = 'block';
+    }
+  };
+</script>
+
+</body>
+</html>
