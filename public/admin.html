@@ -1,0 +1,797 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl" id="html-root">
+<head>
+    <link rel="icon" type="image/png" sizes="32x32" href="images/logo1.png">
+    <link rel="apple-touch-icon" href="images/logo1.png">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard admin</title>
+    <style>
+        :root {
+          --primary: #27ae60;
+          --secondary: #2c3e50;
+        }
+        body { font-family: system-ui, -apple-system, sans-serif; background: #f8f9fa; margin: 0; padding: 20px; color: #333; }
+        .container { max-width: 1200px; margin: auto; }
+        .card { background: white; padding: 20px; border-radius: 10px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); margin-bottom: 25px; }
+        h1, h2, h3, h4 { margin-top: 0; color: #1a1a1a; }
+        .form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 10px; margin-bottom: 10px; align-items: center; }
+        input, textarea, select { padding: 10px; border: 1px solid #ccc; border-radius: 6px; font-size: 14px; width: 100%; box-sizing: border-box; }
+        input[type="color"] { height: 42px; padding: 2px; cursor: pointer; }
+        button { cursor: pointer; padding: 10px 15px; border: none; border-radius: 6px; font-weight: bold; font-size: 14px; transition: opacity 0.2s; }
+        button:hover { opacity: 0.9; }
+        .btn-add { background: var(--primary); color: white; }
+        .btn-save { background: var(--secondary); color: white; }
+        .btn-edit { background: #f39c12; color: white; margin-left: 5px; }
+        .btn-delete { background: #e74c3c; color: white; }
+        .btn-remove-img { background: #c0392b; color: white; padding: 4px 8px; font-size: 11px; margin-top: 4px; border-radius: 4px; }
+        .cat-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #eee; padding-bottom: 10px; flex-wrap: wrap; gap: 10px; }
+        .cat-info { display: flex; align-items: center; gap: 12px; }
+        .cat-thumb { width: 50px; height: 50px; object-fit: cover; border-radius: 8px; border: 1px solid #ddd; }
+        .item-thumb { width: 40px; height: 40px; object-fit: cover; border-radius: 6px; border: 1px solid #ccc; }
+        .item-row { display: grid; grid-template-columns: 110px 1.5fr 1.5fr 0.8fr 1.5fr 1.5fr auto; gap: 8px; align-items: center; background: #fafafa; padding: 10px; border-radius: 6px; margin-top: 8px; border: 1px solid #eee; }
+        @media (max-width: 900px) {
+          .item-row { grid-template-columns: 1fr; }
+        }
+        .preview-box { display: flex; gap: 15px; align-items: center; margin-top: 15px; background: #f0f0f0; padding: 10px; border-radius: 8px; flex-wrap: wrap; }
+        .preview-img-container { text-align: center; }
+        .preview-img { width: 60px; height: 60px; object-fit: cover; border-radius: 8px; border: 1px solid #ccc; display: block; margin: auto; }
+        .status-badge { display: inline-block; padding: 6px 12px; border-radius: 20px; font-size: 13px; font-weight: bold; margin-top: 5px; }
+        .status-active { background: #e8f8f0; color: #27ae60; border: 1px solid #27ae60; }
+        .status-expired { background: #fde8e8; color: #e74c3c; border: 1px solid #e74c3c; }
+    </style>
+</head>
+<body>
+
+<script>
+  // استخراج معرّف المتجر وتخزينه أو تمريره
+  function getStoreParam() {
+    const urlParams = new URLSearchParams(window.location.search);
+    return urlParams.get('store') || urlParams.get('slug') || '';
+  }
+
+  const storeSlug = getStoreParam();
+
+  // التحقق من تسجيل الدخول والتوجيه مع الحفاظ على المتجر
+  if (localStorage.getItem('isAdminLoggedIn') !== 'true') {
+    const loginUrl = storeSlug ? `login.html?store=${encodeURIComponent(storeSlug)}` : 'login.html';
+    window.location.href = loginUrl;
+  }
+
+  (function() {
+    const savedLang = localStorage.getItem('menu_language') || 'ar';
+    const htmlRoot = document.getElementById('html-root');
+    if (savedLang === 'en') {
+      htmlRoot.setAttribute('lang', 'en');
+      htmlRoot.setAttribute('dir', 'ltr');
+    } else {
+      htmlRoot.setAttribute('lang', 'ar');
+      htmlRoot.setAttribute('dir', 'rtl');
+    }
+  })();
+</script>
+
+<div class="container">
+  <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
+    <h1 id="admin-title">⚙️ لوحة إدارة المنيو</h1>
+    <div style="display: flex; gap: 10px;">
+      <button type="button" class="btn-save" onclick="toggleLanguage()" id="lang-toggle-btn" style="background: #34495e;">English / عربي</button>
+      <button type="button" class="btn-delete" onclick="logout()" style="height: fit-content;" id="logout-btn">تسجيل الخروج</button>
+    </div>
+  </div>
+
+  <div class="card" style="border-top: 4px solid #e74c3c;">
+    <h3 id="sub-management-title">⏳ حالة الاشتراك والترخيص (Subscription Management)</h3>
+    <form id="subscription-form">
+      <div class="form-grid">
+        <div>
+          <label><small><b id="label-expiry">تاريخ انتهاء الاشتراك:</b></small></label>
+          <input type="date" id="expiry-date" required>
+        </div>
+        <div>
+          <label><small><b id="label-sub-status">حالة الاشتراك المباشرة:</b></small></label>
+          <select id="subscription-status">
+            <option value="active" id="opt-active">مفعل (يعمل بشكل طبيعي)</option>
+            <option value="disabled" id="opt-disabled">معطل يدوياً (توقيف الخدمة)</option>
+          </select>
+        </div>
+        <div style="align-self: flex-end;">
+          <button type="submit" class="btn-save" style="width: 100%; background: #c0392b;" id="btn-save-sub">حفظ حالة الاشتراك</button>
+        </div>
+      </div>
+      <div id="subscription-info" style="margin-top: 10px;"></div>
+    </form>
+  </div>
+
+  <div class="card" style="border-top: 4px solid var(--primary);">
+    <h3 id="theme-custom-title">🎨 تخصيص الهوية والمظهر والتحكم بالألوان (Theme & Texts Customization)</h3>
+    <form id="theme-form">
+      <div class="form-grid">
+        <div>
+          <label><small><b id="label-res-name">اسم المطعم:</b></small></label>
+          <input type="text" id="res-name" placeholder="اسم المطعم">
+        </div>
+        <div>
+          <label><small><b id="label-tagline">الوصف الفرعي (Tagline):</b></small></label>
+          <input type="text" id="res-tagline" placeholder="مثال: SPECIALITY COFFEE">
+        </div>
+        
+        <div>
+          <label><small><b id="label-welcome-text">نص الترحيب (عربي - Welcome to):</b></small></label>
+          <input type="text" id="welcome-text" placeholder="أهلاً بكم في">
+        </div>
+        <div>
+          <label><small><b id="label-welcome-text-en">نص الترحيب (إنجليزي - EN):</b></small></label>
+          <input type="text" id="welcome-text-en" placeholder="Welcome to">
+        </div>
+        <div>
+          <label><small><b id="label-sub-title">الوصف الترويجي الأسفل (عربي):</b></small></label>
+          <input type="text" id="sub-title" placeholder="طعم لا يُنسى...">
+        </div>
+        <div>
+          <label><small><b id="label-sub-title-en">الوصف الترويجي الأسفل (إنجليزي - EN):</b></small></label>
+          <input type="text" id="sub-title-en" placeholder="Unforgettable taste...">
+        </div>
+
+        <div>
+          <label><small><b id="label-primary-color">اللون الرئيسي (Primary):</b></small></label>
+          <input type="color" id="primary-color" value="#0f2537">
+        </div>
+        <div>
+          <label><small><b id="label-sec-color">خلفية الصفحة (Secondary):</b></small></label>
+          <input type="color" id="secondary-color" value="#e5d5be">
+        </div>
+        <div>
+          <label><small><b id="label-card-bg">خلفية كارت المنتج (Card BG):</b></small></label>
+          <input type="color" id="card-bg-color" value="#d7c4a8">
+        </div>
+        <div>
+          <label><small><b id="label-text-color">لون النص العام (Text Color):</b></small></label>
+          <input type="color" id="text-dark-color" value="#1f1912">
+        </div>
+      </div>
+
+      <div class="form-grid" style="margin-top: 10px; border-top: 1px dashed #ddd; padding-top: 10px;">
+        <div>
+          <label><small><b id="label-heading-color">لون العناوين والأسماء:</b></small></label>
+          <input type="color" id="heading-color" value="#1a1a1a">
+        </div>
+        <div>
+          <label><small><b id="label-brand-color">لون عنوان البراند (Brand Title):</b></small></label>
+          <input type="color" id="brand-title-color" value="#1a1a1a">
+        </div>
+        <div>
+          <label><small><b id="label-desc-color">لون الوصف (Description):</b></small></label>
+          <input type="color" id="description-color" value="#1f1912">
+        </div>
+        <div>
+          <label><small><b id="label-cat-bg-color">لون شريط الأقسام (Categories BG):</b></small></label>
+          <input type="color" id="categories-bg-color" value="#ffffff">
+        </div>
+      </div>
+      
+      <div class="form-grid" style="margin-top: 10px;">
+        <div>
+          <label><small><b id="label-logo">شعار المطعم (Logo):</b></small></label>
+          <input type="file" id="logo-file" accept="image/*">
+        </div>
+        <div>
+          <label><small><b id="label-banner">غلاف المنيو (Banner):</b></small></label>
+          <input type="file" id="banner-file" accept="image/*">
+        </div>
+        <div>
+          <label><small><b id="label-hero-bg">خلفية الرئيسية (صورة):</b></small></label>
+          <input type="file" id="hero-bg-file" accept="image/*">
+        </div>
+        <div>
+          <label><small><b id="label-hero-video">فيديو الرئيسية (MP4):</b></small></label>
+          <input type="file" id="hero-video-file" accept="video/mp4">
+        </div>
+        <div style="align-self: flex-end;">
+          <button type="submit" class="btn-save" style="width: 100%;" id="btn-save-theme">حفظ مظهر المنيو</button>
+        </div>
+      </div>
+      <div class="preview-box" id="theme-preview"></div>
+    </form>
+  </div>
+
+  <div class="card">
+    <h3 id="add-cat-title">إضافة قسم جديد</h3>
+    <form id="add-cat-form" class="form-grid">
+      <input type="text" id="cat-ar" placeholder="اسم القسم (عربي)" required>
+      <input type="text" id="cat-en" placeholder="اسم القسم (إنجليزي)">
+      <input type="file" id="cat-image" accept="image/*">
+      <button type="submit" class="btn-add" id="btn-add-cat">إضافة قسم</button>
+    </form>
+  </div>
+
+  <div id="dashboard-content">جاري تحميل البيانات...</div>
+</div>
+
+<script>
+  const API_URL = '/api';
+
+  // دالة مساعدة لبناء روابط الـ API مرفقة بمعرّف المتجر تلقائياً
+  function buildApiUrl(endpoint) {
+    let url = `${API_URL}${endpoint}`;
+    if (storeSlug) {
+      const separator = url.includes('?') ? '&' : '?';
+      url += `${separator}store=${encodeURIComponent(storeSlug)}`;
+    }
+    return url;
+  }
+
+  const adminTranslations = {
+    ar: {
+      adminTitle: "⚙️ لوحة إدارة المنيو",
+      logout: "تسجيل الخروج",
+      subManagementTitle: "⏳ حالة الاشتراك والترخيص (Subscription Management)",
+      labelExpiry: "تاريخ انتهاء الاشتراك:",
+      labelSubStatus: "حالة الاشتراك المباشرة:",
+      optActive: "مفعل (يعمل بشكل طبيعي)",
+      optDisabled: "معطل يدوياً (توقيف الخدمة)",
+      btnSaveSub: "حفظ حالة الاشتراك",
+      themeCustomTitle: "🎨 تخصيص الهوية والمظهر والتحكم بالألوان (Theme & Texts Customization)",
+      labelResName: "اسم المطعم:",
+      labelTagline: "الوصف الفرعي (Tagline):",
+      labelWelcomeText: "نص الترحيب (عربي):",
+      labelWelcomeTextEn: "نص الترحيب (إنجليزي - EN):",
+      labelSubTitle: "الوصف الترويجي الأسفل (عربي):",
+      labelSubTitleEn: "الوصف الترويجي الأسفل (إنجليزي - EN):",
+      labelPrimaryColor: "اللون الرئيسي (Primary):",
+      labelSecColor: "خلفية الصفحة (Secondary):",
+      labelCardBg: "خلفية كارت المنتج (Card BG):",
+      labelTextColor: "لون النص العام (Text Color):",
+      labelHeadingColor: "لون العناوين والأسماء:",
+      labelBrandColor: "لون عنوان البراند (Brand Title):",
+      labelDescColor: "لون الوصف (Description):",
+      labelCatBgColor: "لون شريط الأقسام (Categories BG):",
+      labelLogo: "شعار المطعم (Logo):",
+      labelBanner: "غلاف المنيو (Banner):",
+      labelHeroBg: "خلفية الرئيسية (صورة):",
+      labelHeroVideo: "فيديو الرئيسية (MP4):",
+      btnSaveTheme: "حفظ مظهر المنيو",
+      addCatTitle: "إضافة قسم جديد",
+      catArPlaceholder: "اسم القسم (عربي)",
+      catEnPlaceholder: "اسم القسم (إنجليزي)",
+      btnAddCat: "إضافة قسم",
+      loadingText: "جاري تحميل البيانات...",
+      noCats: "لا توجد أقسام حالياً. قم بإضافة قسم جديد أعلاه."
+    },
+    en: {
+      adminTitle: "⚙️️ Menu Admin Dashboard",
+      logout: "Logout",
+      subManagementTitle: "⏳ Subscription & License Management",
+      labelExpiry: "Subscription Expiry Date:",
+      labelSubStatus: "Live Subscription Status:",
+      optActive: "Active (Working normally)",
+      optDisabled: "Manually Disabled (Service stopped)",
+      btnSaveSub: "Save Subscription Status",
+      themeCustomTitle: "🎨 Theme, Branding & Color Customization",
+      labelResName: "Restaurant Name:",
+      labelTagline: "Tagline:",
+      labelWelcomeText: "Welcome Text (Arabic):",
+      labelWelcomeTextEn: "Welcome Text (English):",
+      labelSubTitle: "Sub-Title Tagline (Arabic):",
+      labelSubTitleEn: "Sub-Title Tagline (English):",
+      labelPrimaryColor: "Primary Color:",
+      labelSecColor: "Page Background (Secondary):",
+      labelCardBg: "Card Background:",
+      labelTextColor: "General Text Color:",
+      labelHeadingColor: "Headings & Names Color:",
+      labelBrandColor: "Brand Title Color:",
+      labelDescColor: "Description Color:",
+      labelCatBgColor: "Categories Bar BG:",
+      labelLogo: "Restaurant Logo:",
+      labelBanner: "Menu Banner:",
+      labelHeroBg: "Hero Background (Image):",
+      labelHeroVideo: "Hero Video (MP4):",
+      btnSaveTheme: "Save Menu Theme",
+      addCatTitle: "Add New Category",
+      catArPlaceholder: "Category Name (Arabic)",
+      catEnPlaceholder: "Category Name (English)",
+      btnAddCat: "Add Category",
+      loadingText: "Loading data...",
+      noCats: "No categories found. Add a new category above."
+    }
+  };
+
+  function applyAdminTranslations() {
+    const lang = localStorage.getItem('menu_language') || 'ar';
+    const t = adminTranslations[lang];
+
+    document.getElementById('admin-title').innerText = t.adminTitle;
+    document.getElementById('logout-btn').innerText = t.logout;
+    document.getElementById('sub-management-title').innerText = t.subManagementTitle;
+    document.getElementById('label-expiry').innerText = t.labelExpiry;
+    document.getElementById('label-sub-status').innerText = t.labelSubStatus;
+    document.getElementById('opt-active').innerText = t.optActive;
+    document.getElementById('opt-disabled').innerText = t.optDisabled;
+    document.getElementById('btn-save-sub').innerText = t.btnSaveSub;
+    document.getElementById('theme-custom-title').innerText = t.themeCustomTitle;
+    document.getElementById('label-res-name').innerText = t.labelResName;
+    document.getElementById('label-tagline').innerText = t.labelTagline;
+    document.getElementById('label-welcome-text').innerText = t.labelWelcomeText;
+    document.getElementById('label-welcome-text-en').innerText = t.labelWelcomeTextEn;
+    document.getElementById('label-sub-title').innerText = t.labelSubTitle;
+    document.getElementById('label-sub-title-en').innerText = t.labelSubTitleEn;
+    document.getElementById('label-primary-color').innerText = t.labelPrimaryColor;
+    document.getElementById('label-sec-color').innerText = t.labelSecColor;
+    document.getElementById('label-card-bg').innerText = t.labelCardBg;
+    document.getElementById('label-text-color').innerText = t.labelTextColor;
+    document.getElementById('label-heading-color').innerText = t.labelHeadingColor;
+    document.getElementById('label-brand-color').innerText = t.labelBrandColor;
+    document.getElementById('label-desc-color').innerText = t.labelDescColor;
+    document.getElementById('label-cat-bg-color').innerText = t.labelCatBgColor;
+    document.getElementById('label-logo').innerText = t.labelLogo;
+    document.getElementById('label-banner').innerText = t.labelBanner;
+    document.getElementById('label-hero-bg').innerText = t.labelHeroBg;
+    document.getElementById('label-hero-video').innerText = t.labelHeroVideo;
+    document.getElementById('btn-save-theme').innerText = t.btnSaveTheme;
+    document.getElementById('add-cat-title').innerText = t.addCatTitle;
+    document.getElementById('cat-ar').placeholder = t.catArPlaceholder;
+    document.getElementById('cat-en').placeholder = t.catEnPlaceholder;
+    document.getElementById('btn-add-cat').innerText = t.btnAddCat;
+  }
+
+  function toggleLanguage() {
+    const currentLang = localStorage.getItem('menu_language') || 'ar';
+    const newLang = currentLang === 'ar' ? 'en' : 'ar';
+    localStorage.setItem('menu_language', newLang);
+
+    const htmlRoot = document.getElementById('html-root');
+    if (newLang === 'en') {
+      htmlRoot.setAttribute('lang', 'en');
+      htmlRoot.setAttribute('dir', 'ltr');
+    } else {
+      htmlRoot.setAttribute('lang', 'ar');
+      htmlRoot.setAttribute('dir', 'rtl');
+    }
+
+    applyAdminTranslations();
+    loadAdminData();
+  }
+
+  function logout() {
+    localStorage.removeItem('isAdminLoggedIn');
+    const loginUrl = storeSlug ? `login.html?store=${encodeURIComponent(storeSlug)}` : 'login.html';
+    window.location.href = loginUrl;
+  }
+
+  async function loadSettings() {
+    try {
+      const res = await fetch(buildApiUrl('/settings?t=' + new Date().getTime()));
+      if (!res.ok) throw new Error('فشل جلب إعدادات المظهر');
+      const settings = await res.json();
+
+      if (settings) {
+        document.getElementById('res-name').value = settings.restaurantName || '';
+        document.getElementById('res-tagline').value = settings.restaurantTagline || settings.tagline || '';
+        
+        document.getElementById('welcome-text').value = settings.welcomeText || '';
+        document.getElementById('welcome-text-en').value = settings.welcomeText_en || '';
+        document.getElementById('sub-title').value = settings.subTitle || '';
+        document.getElementById('sub-title-en').value = settings.subTitle_en || '';
+
+        document.getElementById('primary-color').value = settings.primaryColor || '#0f2537';
+        document.getElementById('secondary-color').value = settings.secondaryColor || '#e5d5be';
+        document.getElementById('card-bg-color').value = settings.cardBgColor || '#d7c4a8';
+        document.getElementById('text-dark-color').value = settings.textColor || '#1f1912';
+        
+        if (settings.headingColor) document.getElementById('heading-color').value = settings.headingColor;
+        if (settings.brandTitleColor) document.getElementById('brand-title-color').value = settings.brandTitleColor;
+        if (settings.descriptionColor) document.getElementById('description-color').value = settings.descriptionColor;
+        if (settings.categoriesBgColor) document.getElementById('categories-bg-color').value = settings.categoriesBgColor;
+
+        if (settings.expiryDate) {
+          document.getElementById('expiry-date').value = settings.expiryDate.split('T')[0];
+        }
+        if (settings.subscriptionStatus) {
+          document.getElementById('subscription-status').value = settings.subscriptionStatus;
+        }
+
+        const subInfo = document.getElementById('subscription-info');
+        const today = new Date().toISOString().split('T')[0];
+        const isExpired = settings.expiryDate && settings.expiryDate.split('T')[0] < today;
+        const isDisabled = settings.subscriptionStatus === 'disabled';
+        const lang = localStorage.getItem('menu_language') || 'ar';
+
+        if (isDisabled || isExpired) {
+          subInfo.innerHTML = `<span class="status-badge status-expired">${lang === 'en' ? '🔴 Service currently disabled for customers' : '🔴 الخدمة معطلة حالياً للزبائن'} (${isDisabled ? (lang === 'en' ? 'Manual disable' : 'تعطيل يدوياً') : (lang === 'en' ? 'Expired' : 'منتهية الصلاحية')})</span>`;
+        } else {
+          subInfo.innerHTML = `<span class="status-badge status-active">${lang === 'en' ? '🟢 Subscription active until ' : '🟢 الاشتراك فعال وسيستمر حتى '} ${settings.expiryDate ? settings.expiryDate.split('T')[0] : (lang === 'en' ? 'Not specified' : 'غير محدد')}</span>`;
+        }
+
+        const videoUrl = settings.heroVideoUrl || (settings.heroBgUrl && settings.heroBgUrl.endsWith('.mp4') ? settings.heroBgUrl : null);
+        const previewBox = document.getElementById('theme-preview');
+        previewBox.innerHTML = `
+          ${settings.logoUrl ? `
+            <div class="preview-img-container">
+              <small>${lang === 'en' ? 'Current Logo:' : 'الشعار الحالي:'}</small><br>
+              <img src="${settings.logoUrl}" class="preview-img">
+              <button type="button" class="btn-remove-img" onclick="deleteThemeImage('logo')">${lang === 'en' ? 'Delete Logo' : 'حذف الشعار'}</button>
+            </div>` : ''}
+          ${settings.bannerUrl ? `
+            <div class="preview-img-container">
+              <small>${lang === 'en' ? 'Current Banner:' : 'الغلاف الحالي:'}</small><br>
+              <img src="${settings.bannerUrl}" class="preview-img" style="width:120px;">
+              <button type="button" class="btn-remove-img" onclick="deleteThemeImage('banner')">${lang === 'en' ? 'Delete Banner' : 'حذف الغلاف'}</button>
+            </div>` : ''}
+          ${settings.heroBgUrl && !settings.heroBgUrl.endsWith('.mp4') ? `
+            <div class="preview-img-container">
+              <small>${lang === 'en' ? 'Current Hero BG:' : 'خلفية الرئيسية الحالية:'}</small><br>
+              <img src="${settings.heroBgUrl}" class="preview-img" style="width:120px;">
+              <button type="button" class="btn-remove-img" onclick="deleteThemeImage('heroBg')">${lang === 'en' ? 'Delete BG' : 'حذف الخلفية'}</button>
+            </div>` : ''}
+          ${videoUrl ? `
+            <div class="preview-img-container">
+              <small>${lang === 'en' ? 'Current Hero Video:' : 'فيديو الرئيسية الحالي (MP4):'}</small><br>
+              <video style="width:120px; height:60px; border-radius:8px; object-fit:cover;" autoplay muted loop playsinline>
+                <source src="${videoUrl}" type="video/mp4">
+              </video><br>
+              <button type="button" class="btn-remove-img" onclick="deleteThemeImage('heroVideo')">${lang === 'en' ? 'Delete Video' : 'حذف الفيديو'}</button>
+            </div>` : ''}
+        `;
+      }
+    } catch (err) {
+      console.error("فشل تحميل الإعدادات:", err);
+    }
+  }
+
+  function appendCommonFields(formData) {
+    formData.append('restaurantName', document.getElementById('res-name').value);
+    formData.append('restaurantTagline', document.getElementById('res-tagline').value);
+    formData.append('tagline', document.getElementById('res-tagline').value);
+    
+    formData.append('welcomeText', document.getElementById('welcome-text').value);
+    formData.append('welcomeText_en', document.getElementById('welcome-text-en').value);
+    formData.append('subTitle', document.getElementById('sub-title').value);
+    formData.append('subTitle_en', document.getElementById('sub-title-en').value);
+
+    formData.append('primaryColor', document.getElementById('primary-color').value);
+    formData.append('secondaryColor', document.getElementById('secondary-color').value);
+    formData.append('cardBgColor', document.getElementById('card-bg-color').value);
+    formData.append('textColor', document.getElementById('text-dark-color').value);
+    formData.append('headingColor', document.getElementById('heading-color').value);
+    formData.append('brandTitleColor', document.getElementById('brand-title-color').value);
+    formData.append('descriptionColor', document.getElementById('description-color').value);
+    formData.append('categoriesBgColor', document.getElementById('categories-bg-color').value);
+    formData.append('expiryDate', document.getElementById('expiry-date').value);
+    formData.append('subscriptionStatus', document.getElementById('subscription-status').value);
+    
+    if (storeSlug) {
+      formData.append('store', storeSlug);
+    }
+  }
+
+  document.getElementById('subscription-form').onsubmit = async (e) => {
+    e.preventDefault();
+    const formData = new FormData();
+    appendCommonFields(formData);
+
+    try {
+      const res = await fetch(buildApiUrl('/settings'), { method: 'POST', body: formData });
+      const lang = localStorage.getItem('menu_language') || 'ar';
+      if (res.ok) {
+        alert(lang === 'en' ? "Subscription status updated successfully!" : "تم تحديث حالة الاشتراك بنجاح!");
+        loadSettings();
+      } else {
+        alert(lang === 'en' ? "An error occurred while sending data!" : "حدث خطأ أثناء إرسال البيانات!");
+      }
+    } catch (err) {
+      console.error(err);
+      alert("تعذر الاتصال بالسيرفر!");
+    }
+  };
+
+  document.getElementById('theme-form').onsubmit = async (e) => {
+    e.preventDefault();
+    const formData = new FormData();
+    appendCommonFields(formData);
+
+    const logo = document.getElementById('logo-file').files[0];
+    const banner = document.getElementById('banner-file').files[0];
+    const heroBg = document.getElementById('hero-bg-file').files[0];
+    const heroVideo = document.getElementById('hero-video-file').files[0];
+
+    if (logo) formData.append('logo', logo);
+    if (banner) formData.append('banner', banner);
+    if (heroBg) formData.append('heroBg', heroBg);
+    if (heroVideo) formData.append('heroVideo', heroVideo);
+
+    try {
+      const res = await fetch(buildApiUrl('/settings'), { method: 'POST', body: formData });
+      const lang = localStorage.getItem('menu_language') || 'ar';
+      if (res.ok) {
+        alert(lang === 'en' ? "Theme saved successfully!" : "تم حفظ المظهر بنجاح!");
+        document.getElementById('logo-file').value = '';
+        document.getElementById('banner-file').value = '';
+        document.getElementById('hero-bg-file').value = '';
+        document.getElementById('hero-video-file').value = '';
+        loadSettings();
+      } else {
+        alert(lang === 'en' ? "An error occurred while saving data on server." : "حدث خطأ أثناء حفظ البيانات بالسيرفر.");
+      }
+    } catch (err) {
+      console.error(err);
+      alert("تعذر الاتصال بالسيرفر!");
+    }
+  };
+
+  async function deleteThemeImage(type) {
+    const lang = localStorage.getItem('menu_language') || 'ar';
+    if (confirm(lang === 'en' ? "Are you sure you want to delete this?" : "هل أنت متأكد من الحذف؟")) {
+      try {
+        const res = await fetch(buildApiUrl(`/settings/image/${type}`), { method: 'DELETE' });
+        if (res.ok) {
+          alert(lang === 'en' ? "Deleted successfully!" : "تم الحذف بنجاح!");
+          loadSettings();
+        }
+      } catch (err) {
+        console.error(err);
+      }
+    }
+  }
+
+  async function loadAdminData() {
+    try {
+      const res = await fetch(buildApiUrl('/menu?t=' + new Date().getTime()));
+      if (!res.ok) throw new Error('فشل جلب البيانات');
+      const categories = await res.json();
+      const container = document.getElementById('dashboard-content');
+      container.innerHTML = '';
+      const lang = localStorage.getItem('menu_language') || 'ar';
+      const t = adminTranslations[lang];
+
+      if (categories.length === 0) {
+        container.innerHTML = `<div class="card"><p>${t.noCats}</p></div>`;
+        return;
+      }
+
+      categories.forEach(cat => {
+        const catCard = document.createElement('div');
+        catCard.className = 'card';
+
+        const itemsHTML = (cat.items || []).map(item => `
+          <div class="item-row">
+            <div style="text-align:center;">
+              ${item.image ? `
+                <img src="${item.image}" class="item-thumb"><br>
+                <button type="button" class="btn-remove-img" onclick="deleteItemImage('${cat._id}', '${item._id}')">${lang === 'en' ? 'Delete' : 'حذف'}</button>
+              ` : `
+                <small style="color:#888; display:block; margin-bottom:2px;">${lang === 'en' ? 'No image' : 'لا صورة'}</small>
+                <input type="file" id="item-img-file-${item._id}" accept="image/*" style="font-size:10px; padding:2px; width:95px;">
+              `}
+            </div>
+            <input type="text" value="${item.name || ''}" id="name-${item._id}" placeholder="${lang === 'en' ? 'Name (Arabic)' : 'الاسم (عربي)'}">
+            <input type="text" value="${item.name_en || ''}" id="en-${item._id}" placeholder="${lang === 'en' ? 'Name (English)' : 'الاسم (إنجليزي)'}">
+            <input type="text" value="${item.price || ''}" id="price-${item._id}" placeholder="${lang === 'en' ? 'Price' : 'السعر'}">
+            <input type="text" value="${item.description || ''}" id="desc-${item._id}" placeholder="${lang === 'en' ? 'Desc (Arabic)' : 'الوصف (عربي)'}">
+            <input type="text" value="${item.description_en || ''}" id="desc-en-${item._id}" placeholder="${lang === 'en' ? 'Desc (English)' : 'الوصف (إنجليزي)'}">
+            <div style="display: flex;">
+              <button class="btn-edit" onclick="updateItem('${cat._id}', '${item._id}')">${lang === 'en' ? 'Save' : 'حفظ'}</button>
+              <button class="btn-delete" onclick="deleteItem('${cat._id}', '${item._id}')">✕</button>
+            </div>
+          </div>
+        `).join('');
+
+        catCard.innerHTML = `
+          <div class="cat-header">
+            <div class="cat-info">
+              ${cat.image ? `
+                <div style="text-align:center;">
+                  <img src="${cat.image}" class="cat-thumb" alt="${cat.name}"><br>
+                  <button type="button" class="btn-remove-img" onclick="deleteCategoryImage('${cat._id}')">${lang === 'en' ? 'Delete' : 'حذف'}</button>
+                </div>
+              ` : `<div style="font-size:12px; color:#888; background:#eee; padding:8px 12px; border-radius:6px;">${lang === 'en' ? 'No image' : 'بدون صورة'}</div>`}
+              <div>
+                <strong>${cat.name}</strong> (${cat.name_en || (lang === 'en' ? 'No translation' : 'بدون ترجمة')})
+              </div>
+            </div>
+            <div>
+              <button class="btn-edit" onclick="editCategory('${cat._id}', '${cat.name}', '${cat.name_en || ''}')">${lang === 'en' ? 'Edit Category' : 'تعديل القسم'}</button>
+              <button class="btn-delete" onclick="deleteCategory('${cat._id}')">${lang === 'en' ? 'Delete Category' : 'حذف القسم'}</button>
+            </div>
+          </div>
+
+          <h4 style="margin-top: 15px;">${lang === 'en' ? 'Items inside category:' : 'الأصناف داخل القسم:'}</h4>
+          <div id="items-${cat._id}">${itemsHTML}</div>
+
+          <div style="margin-top: 15px; background: #eef9f1; padding: 12px; border-radius: 6px;">
+            <small><b>${lang === 'en' ? '+ Add new item to this category:' : '+ إضافة صنف جديد لهذا القسم:'}</b></small>
+            <div class="form-grid" style="margin-top: 8px;">
+              <input type="text" id="new-item-ar-${cat._id}" placeholder="${lang === 'en' ? 'Name (Arabic)' : 'الاسم (عربي)'}">
+              <input type="text" id="new-item-en-${cat._id}" placeholder="${lang === 'en' ? 'Name (English)' : 'الاسم (إنجليزي)'}">
+              <input type="text" id="new-item-price-${cat._id}" placeholder="${lang === 'en' ? 'Price' : 'السعر'}">
+              <input type="text" id="new-item-desc-${cat._id}" placeholder="${lang === 'en' ? 'Desc (Arabic)' : 'الوصف (عربي)'}">
+              <input type="text" id="new-item-desc-en-${cat._id}" placeholder="${lang === 'en' ? 'Desc (English)' : 'الوصف (إنجليزي)'}">
+              <input type="file" id="new-item-img-${cat._id}" accept="image/*">
+              <button class="btn-add" onclick="addItem('${cat._id}')">${lang === 'en' ? 'Add Item' : 'إضافة صنف'}</button>
+            </div>
+          </div>
+        `;
+        container.appendChild(catCard);
+      });
+    } catch (err) {
+      console.error(err);
+      document.getElementById('dashboard-content').innerHTML = '<p style="color:red;">حدث خطأ أثناء تحميل البيانات.</p>';
+    }
+  }
+
+  document.getElementById('add-cat-form').onsubmit = async (e) => {
+    e.preventDefault();
+    const formData = new FormData();
+    formData.append('name', document.getElementById('cat-ar').value);
+    formData.append('name_en', document.getElementById('cat-en').value);
+    if (storeSlug) formData.append('store', storeSlug);
+    
+    const imageFile = document.getElementById('cat-image').files[0];
+    if (imageFile) formData.append('image', imageFile);
+
+    try {
+      const res = await fetch(buildApiUrl('/categories'), { method: 'POST', body: formData });
+      if (res.ok) {
+        e.target.reset();
+        loadAdminData();
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  // ==========================================
+  // الدوال المسؤولة عن أزرار الحذف والتعديل
+  // ==========================================
+
+  async function editCategory(catId, currentName, currentNameEn) {
+    const lang = localStorage.getItem('menu_language') || 'ar';
+    const newName = prompt(lang === 'en' ? "Edit category name (Arabic):" : "تعديل اسم القسم (عربي):", currentName);
+    if (newName === null) return;
+    const newNameEn = prompt(lang === 'en' ? "Edit category name (English):" : "تعديل اسم القسم (إنجليزي):", currentNameEn);
+
+    try {
+      const res = await fetch(buildApiUrl(`/categories/${catId}`), {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name: newName, name_en: newNameEn })
+      });
+      if (res.ok) {
+        loadAdminData();
+      } else {
+        alert(lang === 'en' ? "Failed to update category" : "فشل تحديث القسم");
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  }
+
+  async function deleteCategory(catId) {
+    const lang = localStorage.getItem('menu_language') || 'ar';
+    if (confirm(lang === 'en' ? "Are you sure you want to delete this category with all its items?" : "هل أنت متأكد من حذف هذا القسم بالكامل مع أصنافه؟")) {
+      try {
+        const res = await fetch(buildApiUrl(`/categories/${catId}`), { method: 'DELETE' });
+        if (res.ok) {
+          loadAdminData();
+        }
+      } catch (err) {
+        console.error(err);
+      }
+    }
+  }
+
+  async function deleteCategoryImage(catId) {
+    const lang = localStorage.getItem('menu_language') || 'ar';
+    if (confirm(lang === 'en' ? "Delete category image?" : "هل تريد حذف صورة القسم؟")) {
+      try {
+        const res = await fetch(buildApiUrl(`/categories/${catId}/image`), { method: 'DELETE' });
+        if (res.ok) {
+          loadAdminData();
+        }
+      } catch (err) {
+        console.error(err);
+      }
+    }
+  }
+
+  async function updateItem(catId, itemId) {
+    const lang = localStorage.getItem('menu_language') || 'ar';
+    const name = document.getElementById(`name-${itemId}`).value;
+    const name_en = document.getElementById(`en-${itemId}`).value;
+    const price = document.getElementById(`price-${itemId}`).value;
+    const description = document.getElementById(`desc-${itemId}`).value;
+    const description_en = document.getElementById(`desc-en-${itemId}`).value;
+
+    const formData = new FormData();
+    formData.append('name', name);
+    formData.append('name_en', name_en);
+    formData.append('price', price);
+    formData.append('description', description);
+    formData.append('description_en', description_en);
+
+    // التحقق إذا تم رفع صورة جديدة للصنف أثناء التعديل
+    const imgInput = document.getElementById(`item-img-file-${itemId}`);
+    if (imgInput && imgInput.files[0]) {
+      formData.append('image', imgInput.files[0]);
+    }
+
+    try {
+      const res = await fetch(buildApiUrl(`/categories/${catId}/items/${itemId}`), {
+        method: 'PUT',
+        body: formData
+      });
+      if (res.ok) {
+        alert(lang === 'en' ? "Item updated successfully!" : "تم حفظ التعديلات بنجاح!");
+        loadAdminData();
+      } else {
+        alert(lang === 'en' ? "Failed to update item" : "فشل تحديث الصنف");
+      }
+    } catch (err) {
+      console.error(err);
+      alert(lang === 'en' ? "Server connection error" : "حدث خطأ في الاتصال بالسيرفر");
+    }
+  }
+
+  async function deleteItem(catId, itemId) {
+    const lang = localStorage.getItem('menu_language') || 'ar';
+    if (confirm(lang === 'en' ? "Are you sure you want to delete this item?" : "هل أنت متأكد من حذف هذا الصنف؟")) {
+      try {
+        const res = await fetch(buildApiUrl(`/categories/${catId}/items/${itemId}`), { method: 'DELETE' });
+        if (res.ok) {
+          loadAdminData();
+        }
+      } catch (err) {
+        console.error(err);
+      }
+    }
+  }
+
+  async function deleteItemImage(catId, itemId) {
+    const lang = localStorage.getItem('menu_language') || 'ar';
+    if (confirm(lang === 'en' ? "Delete this item's image?" : "هل تريد حذف صورة هذا الصنف؟")) {
+      try {
+        const res = await fetch(buildApiUrl(`/categories/${catId}/items/${itemId}/image`), { method: 'DELETE' });
+        if (res.ok) {
+          loadAdminData();
+        }
+      } catch (err) {
+        console.error(err);
+      }
+    }
+  }
+
+  async function addItem(catId) {
+    const lang = localStorage.getItem('menu_language') || 'ar';
+    const formData = new FormData();
+    formData.append('name', document.getElementById(`new-item-ar-${catId}`).value);
+    formData.append('name_en', document.getElementById(`new-item-en-${catId}`).value);
+    formData.append('price', document.getElementById(`new-item-price-${catId}`).value);
+    formData.append('description', document.getElementById(`new-item-desc-${catId}`).value);
+    formData.append('description_en', document.getElementById(`new-item-desc-en-${catId}`).value);
+    
+    const imgInput = document.getElementById(`new-item-img-${catId}`);
+    if (imgInput && imgInput.files[0]) {
+      formData.append('image', imgInput.files[0]);
+    }
+    if (storeSlug) formData.append('store', storeSlug);
+
+    try {
+      const res = await fetch(buildApiUrl(`/categories/${catId}/items`), { method: 'POST', body: formData });
+      if (res.ok) {
+        loadAdminData();
+      } else {
+        alert(lang === 'en' ? "Failed to add item" : "فشل إضافة الصنف");
+      }
+    } catch (err) { 
+      console.error(err); 
+    }
+  }
+
+  // تهيئة الصفحة عند التحميل
+  document.addEventListener('DOMContentLoaded', () => {
+    applyAdminTranslations();
+    loadSettings();
+    loadAdminData();
+  });
+</script>
+</body>
+</html>
