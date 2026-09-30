@@ -1,0 +1,694 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl" id="admin-html-root">
+<head>
+   <link rel="icon" type="image/png" sizes="32x32" href="images/logo1.png">
+<link rel="apple-touch-icon" href="images/logo1.png">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title id="admin-title">restaurant Dashboard admin</title>
+  <style>
+    :root {
+      --primary: #27ae60;
+      --secondary: #2c3e50;
+    }
+    body { font-family: system-ui, -apple-system, sans-serif; background: #f8f9fa; margin: 0; padding: 20px; color: #333; }
+    .container { max-width: 1200px; margin: auto; }
+    .card { background: white; padding: 20px; border-radius: 10px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); margin-bottom: 25px; }
+    h1, h2, h3, h4 { margin-top: 0; color: #1a1a1a; }
+    .form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 10px; margin-bottom: 10px; align-items: center; }
+    input, textarea, select { padding: 10px; border: 1px solid #ccc; border-radius: 6px; font-size: 14px; width: 100%; box-sizing: border-box; }
+    button { cursor: pointer; padding: 10px 15px; border: none; border-radius: 6px; font-weight: bold; font-size: 14px; transition: opacity 0.2s; }
+    button:hover { opacity: 0.9; }
+    .btn-add { background: var(--primary); color: white; }
+    .btn-save { background: var(--secondary); color: white; }
+    .btn-edit { background: #f39c12; color: white; margin-left: 5px; }
+    .btn-delete { background: #e74c3c; color: white; }
+    .btn-lang { background: #e2e8f0; color: #333; }
+    .btn-remove-img { background: #c0392b; color: white; padding: 4px 8px; font-size: 11px; margin-top: 4px; border-radius: 4px; }
+    .cat-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #eee; padding-bottom: 10px; flex-wrap: wrap; gap: 10px; }
+    .cat-info { display: flex; align-items: center; gap: 12px; }
+    .cat-thumb { width: 50px; height: 50px; object-fit: cover; border-radius: 8px; border: 1px solid #ddd; }
+    .item-thumb { width: 40px; height: 40px; object-fit: cover; border-radius: 6px; border: 1px solid #ccc; }
+    
+    .item-row { display: grid; grid-template-columns: 70px 1.5fr 1.5fr 1fr 1.5fr 1.5fr 100px auto; gap: 8px; align-items: center; background: #fafafa; padding: 10px; border-radius: 6px; margin-top: 8px; border: 1px solid #eee; }
+    @media (max-width: 900px) {
+      .item-row { grid-template-columns: 1fr; }
+    }
+    
+    .preview-box { display: flex; gap: 15px; align-items: center; margin-top: 15px; background: #f0f0f0; padding: 10px; border-radius: 8px; flex-wrap: wrap; }
+    .preview-img-container { text-align: center; }
+    .preview-img { width: 60px; height: 60px; object-fit: cover; border-radius: 8px; border: 1px solid #ccc; display: block; margin: auto; }
+    
+    .expiry-card { background: linear-gradient(135deg, #2c3e50, #34495e); color: white; display: flex; justify-content: space-between; align-items: center; border-right: 6px solid #e74c3c; flex-wrap: wrap; gap: 10px; }
+    .expiry-info h3 { color: #fff; margin-bottom: 5px; }
+    .expiry-date-badge { background: rgba(255, 255, 255, 0.15); padding: 8px 15px; border-radius: 6px; font-size: 16px; font-weight: bold; border: 1px solid rgba(255,255,255,0.2); }
+  </style>
+</head>
+<body>
+
+<!-- تطبيق اللغة وحماية الصفحة وجلب معرّف المتجر فوراً -->
+<script>
+  // استخراج معرّف المتجر من الرابط
+  function getStoreParam() {
+    const urlParams = new URLSearchParams(window.location.search);
+    return urlParams.get('store') || urlParams.get('slug') || '';
+  }
+  const storeSlug = getStoreParam();
+
+  // فحص حالة تسجيل الدخول، وإذا لم يكن مسجلاً، يتم توجيهه لصفحة الدخول مع الاحتفاظ بالمتجر
+  if (localStorage.getItem('isRestaurantLoggedIn') !== 'true') {
+    const loginUrl = storeSlug ? `restaurant-login.html?store=${encodeURIComponent(storeSlug)}` : 'restaurant-login.html';
+    window.location.href = loginUrl;
+  }
+
+  // تطبيق اللغة المخزنة فوراً
+  (function() {
+    const savedLang = localStorage.getItem('menu_language') || 'ar';
+    const htmlRoot = document.getElementById('admin-html-root');
+    if (savedLang === 'en') {
+      htmlRoot.setAttribute('lang', 'en');
+      htmlRoot.setAttribute('dir', 'ltr');
+    } else {
+      htmlRoot.setAttribute('lang', 'ar');
+      htmlRoot.setAttribute('dir', 'rtl');
+    }
+  })();
+</script>
+
+<div class="container">
+  <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 10px;">
+    <h1 id="main-heading">⚙️ لوحة إدارة المنيو (خاص بصاحب المطعم)</h1>
+    <div style="display: flex; gap: 10px;">
+      <button type="button" class="btn-lang" onclick="toggleAdminLanguage()">English / عربي</button>
+      <button type="button" class="btn-delete" onclick="logout()" style="height: fit-content;" id="btn-logout">تسجيل الخروج</button>
+    </div>
+  </div>
+
+  <!-- بطاقة عرض تاريخ الاكسباير (انتهاء الاشتراك) -->
+  <div class="card expiry-card">
+    <div class="expiry-info">
+      <h3 id="expiry-title">⏳ حالة اشتراك ولحظة انتهاء الصلاحية</h3>
+      <p id="expiry-status-text" style="margin: 0; color: #ecf0f1; font-size: 14px;">جاري التحقق من تاريخ انتهاء الصلاحية...</p>
+    </div>
+    <div>
+      <div id="expiry-date-display" class="expiry-date-badge">--/--/----</div>
+    </div>
+  </div>
+
+  <!-- بطاقة تخصيص الهوية والمظهر -->
+  <div class="card" style="border-top: 4px solid var(--primary);">
+    <h3 id="theme-card-title">🎨 تخصيص هوية المطعم والملفات</h3>
+    <form id="theme-form">
+      <div class="form-grid">
+        <div>
+          <label><small><b id="label-res-name">اسم المطعم:</b></small></label>
+          <input type="text" id="res-name" placeholder="اسم المطعم">
+        </div>
+        <div>
+          <label><small><b id="label-res-tagline">الوصف الفرعي (Tagline):</b></small></label>
+          <input type="text" id="res-tagline" placeholder="مثال: SPECIALITY COFFEE">
+        </div>
+      </div>
+      
+      <div class="form-grid" style="margin-top: 15px;">
+        <div>
+          <label><small><b id="label-logo">شعار المطعم (Logo):</b></small></label>
+          <input type="file" id="logo-file" accept="image/*">
+        </div>
+        <div>
+          <label><small><b id="label-banner">غلاف المنيو (Banner):</b></small></label>
+          <input type="file" id="banner-file" accept="image/*">
+        </div>
+        <div>
+          <label><small><b id="label-hero-bg">خلفية الرئيسية (صورة):</b></small></label>
+          <input type="file" id="hero-bg-file" accept="image/*">
+        </div>
+        <div>
+          <label><small><b id="label-hero-video">فيديو الرئيسية (MP4):</b></small></label>
+          <input type="file" id="hero-video-file" accept="video/mp4,video/*">
+        </div>
+        <div style="align-self: flex-end;">
+          <button type="submit" class="btn-save" style="width: 100%;" id="btn-save-theme">حفظ التغييرات</button>
+        </div>
+      </div>
+      <div class="preview-box" id="theme-preview"></div>
+    </form>
+  </div>
+
+  <!-- إضافة قسم جديد -->
+  <div class="card">
+    <h3 id="add-cat-title">إضافة قسم جديد</h3>
+    <form id="add-cat-form" class="form-grid">
+      <input type="text" id="cat-ar" placeholder="اسم القسم (عربي)" required>
+      <input type="text" id="cat-en" placeholder="اسم القسم (إنجليزي)">
+      <input type="file" id="cat-image" accept="image/*">
+      <button type="submit" class="btn-add" id="btn-add-cat">إضافة قسم</button>
+    </form>
+  </div>
+
+  <!-- عرض الأقسام والمنتجات -->
+  <div id="dashboard-content">جاري تحميل البيانات...</div>
+</div>
+
+<script>
+  const API_URL = '/api';
+
+  // دالة مساعدة لربط روابط الـ API بمعرّف المتجر تلقائياً
+  function buildApiUrl(endpoint) {
+    let url = `${API_URL}${endpoint}`;
+    if (storeSlug) {
+      const separator = url.includes('?') ? '&' : '?';
+      url += `${separator}store=${encodeURIComponent(storeSlug)}`;
+    }
+    return url;
+  }
+
+  // معجم النصوص الشامل للوحة التحكم (عربي / إنجليزي)
+  const adminTranslations = {
+    ar: {
+      pageTitle: "restaurant Dashboard admin",
+      mainHeading: "⚙️ لوحة إدارة المنيو (خاص بصاحب المطعم)",
+      logout: "تسجيل الخروج",
+      expiryTitle: "⏳ حالة اشتراك ولحظة انتهاء الصلاحية",
+      expiryChecking: "جاري التحقق من تاريخ انتهاء الصلاحية...",
+      expiryNotAvailable: "غير متوفر",
+      expiryNotSet: "لم يتم تحديد تاريخ انتهاء الصلاحية من قبل الإدارة.",
+      expiryActive: (days) => `حسابك نشط. متبقي حتى موعد التجديد القادم حوالي ${days} يوم.`,
+      expiryExpired: "⚠️ انتهت صلاحية الاشتراك بالفعل! يرجى التجديد.",
+      expiryWarning: (days) => `⚠️ تنبيه: متبقي ${days} أيام فقط على انتهاء الاشتراك!`,
+      themeCardTitle: "🎨 تخصيص هوية المطعم والملفات",
+      labelResName: "اسم المطعم:",
+      labelResTagline: "الوصف الفرعي (Tagline):",
+      labelLogo: "شعار المطعم (Logo):",
+      labelBanner: "غلاف المنيو (Banner):",
+      labelHeroBg: "خلفية الرئيسية (صورة):",
+      labelHeroVideo: "فيديو الرئيسية (MP4):",
+      btnSaveTheme: "حفظ التغييرات",
+      addCatTitle: "إضافة قسم جديد",
+      catArPlaceholder: "اسم القسم (عربي)",
+      catEnPlaceholder: "اسم القسم (إنجليزي)",
+      btnAddCat: "إضافة قسم",
+      loadingText: "جاري تحميل البيانات...",
+      noCategories: "لا توجد أقسام حالياً. قم بإضافة قسم جديد أعلاه.",
+      itemsTitle: "الأصناف داخل القسم:",
+      editCategoryBtn: "تعديل القسم",
+      deleteCategoryBtn: "حذف القسم",
+      noImage: "لا صورة",
+      noImageCat: "بدون صورة",
+      noTranslation: "بدون ترجمة",
+      addItemHeading: "+ إضافة صنف جديد لهذا القسم:",
+      nameArPlaceholder: "الاسم (عربي)",
+      nameEnPlaceholder: "الاسم (إنجليزي)",
+      pricePlaceholder: "السعر",
+      descArPlaceholder: "الوصف (عربي)",
+      descEnPlaceholder: "الوصف (إنجليزي)",
+      btnAddItem: "إضافة صنف",
+      btnSave: "حفظ",
+      btnDelete: "حذف",
+      deleteImgBtn: "حذف",
+      deleteLogo: "حذف الشعار",
+      deleteBanner: "حذف الغلاف",
+      deleteHeroBg: "حذف الخلفية",
+      deleteHeroVideo: "حذف الفيديو",
+      currentLogo: "الشعار الحالي:",
+      currentBanner: "الغلاف الحالي:",
+      currentHeroBg: "خلفية الرئيسية الحالية:",
+      currentHeroVideo: "فيديو الرئيسية الحالي:"
+    },
+    en: {
+      pageTitle: "Restaurant Admin Dashboard",
+      mainHeading: "⚙️ Menu Management Dashboard (Restaurant Owner)",
+      logout: "Logout",
+      expiryTitle: "⏳ Subscription & Expiry Status",
+      expiryChecking: "Checking expiry date...",
+      expiryNotAvailable: "Not Available",
+      expiryNotSet: "Expiry date not set by management.",
+      expiryActive: (days) => `Your account is active. Approx. ${days} days remaining until renewal.`,
+      expiryExpired: "⚠️ Subscription has expired! Please renew.",
+      expiryWarning: (days) => `⚠️ Warning: Only ${days} days remaining until subscription expires!`,
+      themeCardTitle: "🎨 Restaurant Identity & Media Customization",
+      labelResName: "Restaurant Name:",
+      labelResTagline: "Tagline:",
+      labelLogo: "Restaurant Logo:",
+      labelBanner: "Menu Banner:",
+      labelHeroBg: "Hero Background (Image):",
+      labelHeroVideo: "Hero Video (MP4):",
+      btnSaveTheme: "Save Changes",
+      addCatTitle: "Add New Category",
+      catArPlaceholder: "Category Name (Arabic)",
+      catEnPlaceholder: "Category Name (English)",
+      btnAddCat: "Add Category",
+      loadingText: "Loading data...",
+      noCategories: "No categories found. Add a new category above.",
+      itemsTitle: "Items in Category:",
+      editCategoryBtn: "Edit Category",
+      deleteCategoryBtn: "Delete Category",
+      noImage: "No image",
+      noImageCat: "No image",
+      noTranslation: "No translation",
+      addItemHeading: "+ Add New Item to this Category:",
+      nameArPlaceholder: "Name (Arabic)",
+      nameEnPlaceholder: "Name (English)",
+      pricePlaceholder: "Price",
+      descArPlaceholder: "Description (Arabic)",
+      descEnPlaceholder: "Description (English)",
+      btnAddItem: "Add Item",
+      btnSave: "Save",
+      btnDelete: "Delete",
+      deleteImgBtn: "Delete",
+      deleteLogo: "Delete Logo",
+      deleteBanner: "Delete Banner",
+      deleteHeroBg: "Delete Background",
+      deleteHeroVideo: "Delete Video",
+      currentLogo: "Current Logo:",
+      currentBanner: "Current Banner:",
+      currentHeroBg: "Current Hero BG:",
+      currentHeroVideo: "Current Hero Video:"
+    }
+  };
+
+  let lastLoadedSettings = null;
+
+  function applyAdminTranslations() {
+    const lang = localStorage.getItem('menu_language') || 'ar';
+    const t = adminTranslations[lang];
+
+    document.getElementById('admin-title').textContent = t.pageTitle;
+    document.getElementById('main-heading').textContent = t.mainHeading;
+    document.getElementById('btn-logout').textContent = t.logout;
+    document.getElementById('expiry-title').textContent = t.expiryTitle;
+    document.getElementById('theme-card-title').textContent = t.themeCardTitle;
+    document.getElementById('label-res-name').textContent = t.labelResName;
+    document.getElementById('label-res-tagline').textContent = t.labelResTagline;
+    document.getElementById('label-logo').textContent = t.labelLogo;
+    document.getElementById('label-banner').textContent = t.labelBanner;
+    document.getElementById('label-hero-bg').textContent = t.labelHeroBg;
+    document.getElementById('label-hero-video').textContent = t.labelHeroVideo;
+    document.getElementById('btn-save-theme').textContent = t.btnSaveTheme;
+    document.getElementById('add-cat-title').textContent = t.addCatTitle;
+    document.getElementById('cat-ar').placeholder = t.catArPlaceholder;
+    document.getElementById('cat-en').placeholder = t.catEnPlaceholder;
+    document.getElementById('btn-add-cat').textContent = t.btnAddCat;
+
+    if (lastLoadedSettings) {
+      renderThemePreview(lastLoadedSettings, t);
+    }
+    loadAdminData();
+  }
+
+  function toggleAdminLanguage() {
+    const currentLang = localStorage.getItem('menu_language') || 'ar';
+    const newLang = currentLang === 'ar' ? 'en' : 'ar';
+    localStorage.setItem('menu_language', newLang);
+
+    const htmlRoot = document.getElementById('admin-html-root');
+    if (newLang === 'en') {
+      htmlRoot.setAttribute('lang', 'en');
+      htmlRoot.setAttribute('dir', 'ltr');
+    } else {
+      htmlRoot.setAttribute('lang', 'ar');
+      htmlRoot.setAttribute('dir', 'rtl');
+    }
+
+    applyAdminTranslations();
+  }
+
+  function logout() {
+    localStorage.removeItem('isRestaurantLoggedIn');
+    localStorage.removeItem('restaurantToken');
+    const loginUrl = storeSlug ? `restaurant-login.html?store=${encodeURIComponent(storeSlug)}` : 'restaurant-login.html';
+    window.location.href = loginUrl;
+  }
+
+  async function loadSettings() {
+    try {
+      const res = await fetch(buildApiUrl(`/settings?t=${new Date().getTime()}`));
+      if (!res.ok) throw new Error('فشل جلب إعدادات المطعم');
+      const settings = await res.json();
+      lastLoadedSettings = settings;
+
+      if (settings) {
+        document.getElementById('res-name').value = settings.restaurantName || '';
+        document.getElementById('res-tagline').value = settings.restaurantTagline || settings.tagline || '';
+
+        const expiryDateStr = settings.expiresAt || settings.expiryDate || settings.expiry;
+        const expiryBadge = document.getElementById('expiry-date-display');
+        const expiryStatusText = document.getElementById('expiry-status-text');
+        const lang = localStorage.getItem('menu_language') || 'ar';
+        const t = adminTranslations[lang];
+
+        if (expiryDateStr) {
+          const expiryDate = new Date(expiryDateStr);
+          const currentDate = new Date();
+          
+          expiryBadge.textContent = expiryDate.toLocaleDateString(lang === 'en' ? 'en-US' : 'ar-EG', {
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric'
+          });
+
+          const diffTime = expiryDate - currentDate;
+          const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+          if (diffDays < 0) {
+            expiryStatusText.innerHTML = `<span style="color: #ff6b6b; font-weight: bold;">${t.expiryExpired}</span>`;
+          } else if (diffDays <= 7) {
+            expiryStatusText.innerHTML = `<span style="color: #f1c40f; font-weight: bold;">${t.expiryWarning(diffDays)}</span>`;
+          } else {
+            expiryStatusText.textContent = t.expiryActive(diffDays);
+          }
+        } else {
+          expiryBadge.textContent = t.expiryNotAvailable;
+          expiryStatusText.textContent = t.expiryNotSet;
+        }
+
+        renderThemePreview(settings, t);
+      }
+    } catch (err) {
+      console.error("فشل تحميل الإعدادات:", err);
+      const lang = localStorage.getItem('menu_language') || 'ar';
+      document.getElementById('expiry-status-text').textContent = adminTranslations[lang].expiryNotAvailable;
+    }
+  }
+
+  function renderThemePreview(settings, t) {
+    const videoUrl = settings.heroVideoUrl || (settings.heroBgUrl && settings.heroBgUrl.endsWith('.mp4') ? settings.heroBgUrl : null);
+    const previewBox = document.getElementById('theme-preview');
+    previewBox.innerHTML = `
+      ${settings.logoUrl ? `
+        <div class="preview-img-container">
+          <small>${t.currentLogo}</small><br>
+          <img src="${settings.logoUrl}" class="preview-img">
+          <button type="button" class="btn-remove-img" onclick="deleteThemeImage('logo')">${t.deleteLogo}</button>
+        </div>` : ''}
+      ${settings.bannerUrl ? `
+        <div class="preview-img-container">
+          <small>${t.currentBanner}</small><br>
+          <img src="${settings.bannerUrl}" class="preview-img" style="width:120px;">
+          <button type="button" class="btn-remove-img" onclick="deleteThemeImage('banner')">${t.deleteBanner}</button>
+        </div>` : ''}
+      ${settings.heroBgUrl && !settings.heroBgUrl.endsWith('.mp4') ? `
+        <div class="preview-img-container">
+          <small>${t.currentHeroBg}</small><br>
+          <img src="${settings.heroBgUrl}" class="preview-img" style="width:120px;">
+          <button type="button" class="btn-remove-img" onclick="deleteThemeImage('heroBg')">${t.deleteHeroBg}</button>
+        </div>` : ''}
+      ${videoUrl ? `
+        <div class="preview-img-container">
+          <small>${t.currentHeroVideo}</small><br>
+          <video src="${videoUrl}" style="width:120px; height:60px; border-radius:8px; object-fit:cover;" autoplay loop muted></video><br>
+          <button type="button" class="btn-remove-img" onclick="deleteThemeImage('heroVideo')">${t.deleteHeroVideo}</button>
+        </div>` : ''}
+    `;
+  }
+
+  document.getElementById('theme-form').onsubmit = async (e) => {
+    e.preventDefault();
+    const formData = new FormData();
+    formData.append('restaurantName', document.getElementById('res-name').value);
+    formData.append('restaurantTagline', document.getElementById('res-tagline').value);
+    formData.append('tagline', document.getElementById('res-tagline').value);
+    if (storeSlug) formData.append('store', storeSlug);
+
+    const logo = document.getElementById('logo-file').files[0];
+    const banner = document.getElementById('banner-file').files[0];
+    const heroBg = document.getElementById('hero-bg-file').files[0];
+    const heroVideo = document.getElementById('hero-video-file').files[0];
+
+    if (logo) formData.append('logo', logo);
+    if (banner) formData.append('banner', banner);
+    if (heroBg) formData.append('heroBg', heroBg);
+    if (heroVideo) formData.append('heroVideo', heroVideo);
+
+    try {
+      const res = await fetch(buildApiUrl('/settings'), { method: 'POST', body: formData });
+      if (res.ok) {
+        alert("تم حفظ التعديلات بنجاح!");
+        document.getElementById('logo-file').value = '';
+        document.getElementById('banner-file').value = '';
+        document.getElementById('hero-bg-file').value = '';
+        document.getElementById('hero-video-file').value = '';
+        loadSettings();
+      } else {
+        alert("حدث خطأ أثناء حفظ البيانات بالسيرفر.");
+      }
+    } catch (err) {
+      console.error(err);
+      alert("تعذر الاتصال بالسيرفر!");
+    }
+  };
+
+  async function deleteThemeImage(type) {
+    if (confirm("هل أنت تأكد من الحذف؟")) {
+      try {
+        const res = await fetch(buildApiUrl(`/settings/image/${type}`), { method: 'DELETE' });
+        if (res.ok) {
+          alert("تم الحذف بنجاح!");
+          loadSettings();
+        }
+      } catch (err) {
+        console.error(err);
+      }
+    }
+  }
+
+  async function loadAdminData() {
+    try {
+      const lang = localStorage.getItem('menu_language') || 'ar';
+      const t = adminTranslations[lang];
+
+      const res = await fetch(buildApiUrl(`/menu?t=${new Date().getTime()}`));
+      if (!res.ok) throw new Error('فشل جلب البيانات');
+      const categories = await res.json();
+      const container = document.getElementById('dashboard-content');
+      container.innerHTML = '';
+
+      if (categories.length === 0) {
+        container.innerHTML = `<div class="card"><p>${t.noCategories}</p></div>`;
+        return;
+      }
+
+      categories.forEach(cat => {
+        const catCard = document.createElement('div');
+        catCard.className = 'card';
+
+        const itemsHTML = (cat.items || []).map(item => `
+          <div class="item-row">
+            <div style="text-align:center;">
+              ${item.image ? `
+                <img src="${item.image}" class="item-thumb"><br>
+                <button type="button" class="btn-remove-img" onclick="deleteItemImage('${cat._id}', '${item._id}')">${t.deleteImgBtn}</button>
+              ` : `<small>${t.noImage}</small>`}
+            </div>
+            <input type="text" value="${item.name || ''}" id="name-${item._id}" placeholder="${t.nameArPlaceholder}">
+            <input type="text" value="${item.name_en || ''}" id="en-${item._id}" placeholder="${t.nameEnPlaceholder}">
+            <input type="text" value="${item.price || ''}" id="price-${item._id}" placeholder="${t.pricePlaceholder}">
+            <input type="text" value="${item.description || ''}" id="desc-${item._id}" placeholder="${t.descArPlaceholder}">
+            <input type="text" value="${item.description_en || ''}" id="desc-en-${item._id}" placeholder="${t.descEnPlaceholder}">
+            <div>
+              <input type="file" id="item-img-${item._id}" accept="image/*" style="font-size: 11px; padding: 4px;">
+            </div>
+            <div style="display: flex;">
+              <button class="btn-edit" onclick="updateItem('${cat._id}', '${item._id}')">${t.btnSave}</button>
+              <button class="btn-delete" onclick="deleteItem('${cat._id}', '${item._id}')">✕</button>
+            </div>
+          </div>
+        `).join('');
+
+        catCard.innerHTML = `
+          <div class="cat-header">
+            <div class="cat-info">
+              ${cat.image ? `
+                <div style="text-align:center;">
+                  <img src="${cat.image}" class="cat-thumb" alt="${cat.name}"><br>
+                  <button type="button" class="btn-remove-img" onclick="deleteCategoryImage('${cat._id}')">${t.deleteImgBtn}</button>
+                </div>
+              ` : `<div style="font-size:12px; color:#888; background:#eee; padding:8px 12px; border-radius:6px;">${t.noImageCat}</div>`}
+              <div>
+                <strong>${cat.name}</strong> (${cat.name_en || t.noTranslation})
+              </div>
+            </div>
+            <div>
+              <button class="btn-edit" onclick="editCategory('${cat._id}', '${cat.name}', '${cat.name_en || ''}')">${t.editCategoryBtn}</button>
+              <button class="btn-delete" onclick="deleteCategory('${cat._id}')">${t.deleteCategoryBtn}</button>
+            </div>
+          </div>
+
+          <h4 style="margin-top: 15px;">${t.itemsTitle}</h4>
+          <div id="items-${cat._id}">${itemsHTML}</div>
+
+          <div style="margin-top: 15px; background: #eef9f1; padding: 12px; border-radius: 6px;">
+            <small><b>${t.addItemHeading}</b></small>
+            <div class="form-grid" style="margin-top: 8px; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));">
+              <input type="text" id="new-item-ar-${cat._id}" placeholder="${t.nameArPlaceholder}">
+              <input type="text" id="new-item-en-${cat._id}" placeholder="${t.nameEnPlaceholder}">
+              <input type="text" id="new-item-price-${cat._id}" placeholder="${t.pricePlaceholder}">
+              <input type="text" id="new-item-desc-${cat._id}" placeholder="${t.descArPlaceholder}">
+              <input type="text" id="new-item-desc-en-${cat._id}" placeholder="${t.descEnPlaceholder}">
+              <input type="file" id="new-item-img-${cat._id}" accept="image/*">
+              <button class="btn-add" onclick="addItem('${cat._id}')">${t.btnAddItem}</button>
+            </div>
+          </div>
+        `;
+        container.appendChild(catCard);
+      });
+    } catch (err) {
+      console.error(err);
+      const lang = localStorage.getItem('menu_language') || 'ar';
+      document.getElementById('dashboard-content').innerHTML = `<p style="color:red;">${lang === 'en' ? 'Error loading data.' : 'حدث خطأ أثناء تحميل البيانات.'}</p>`;
+    }
+  }
+
+  document.getElementById('add-cat-form').onsubmit = async (e) => {
+    e.preventDefault();
+    const formData = new FormData();
+    formData.append('name', document.getElementById('cat-ar').value);
+    formData.append('name_en', document.getElementById('cat-en').value);
+    if (storeSlug) formData.append('store', storeSlug);
+    
+    const imageFile = document.getElementById('cat-image').files[0];
+    if (imageFile) formData.append('image', imageFile);
+
+    try {
+      const res = await fetch(buildApiUrl('/categories'), { method: 'POST', body: formData });
+      if (res.ok) {
+        e.target.reset();
+        loadAdminData();
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  async function editCategory(id, currentAr, currentEn) {
+    const lang = localStorage.getItem('menu_language') || 'ar';
+    const newName = prompt(lang === 'en' ? 'Arabic Category Name:' : "اسم القسم بالعربي:", currentAr);
+    if (newName === null) return;
+    const newEn = prompt(lang === 'en' ? 'English Category Name:' : "اسم القسم بالإنجليزي:", currentEn);
+    if (newEn === null) return;
+
+    const imageInput = document.createElement('input');
+    imageInput.type = 'file';
+    imageInput.accept = 'image/*';
+
+    imageInput.onchange = async e => {
+      const file = e.target.files[0];
+      const formData = new FormData();
+      formData.append('name', newName);
+      formData.append('name_en', newEn);
+      if (storeSlug) formData.append('store', storeSlug);
+      if (file) formData.append('image', file);
+
+      try {
+        const res = await fetch(buildApiUrl(`/categories/${id}`), { method: 'PUT', body: formData });
+        if (res.ok) {
+          alert(lang === 'en' ? 'Category updated successfully!' : "تم تعديل القسم وتحديث الصورة بنجاح!");
+          loadAdminData();
+        }
+      } catch (err) { console.error(err); }
+    };
+
+    if (confirm(lang === 'en' ? 'Do you want to change category image?' : "هل تريد اختيار أو تغيير صورة لهذا القسم؟")) {
+      imageInput.click();
+    } else {
+      const formData = new FormData();
+      formData.append('name', newName);
+      formData.append('name_en', newEn);
+      if (storeSlug) formData.append('store', storeSlug);
+      try {
+        const res = await fetch(buildApiUrl(`/categories/${id}`), { method: 'PUT', body: formData });
+        if (res.ok) {
+          alert(lang === 'en' ? 'Category updated successfully!' : "تم تحديث بيانات القسم بنجاح!");
+          loadAdminData();
+        }
+      } catch (err) { console.error(err); }
+    }
+  }
+
+  async function deleteCategory(id) {
+    const lang = localStorage.getItem('menu_language') || 'ar';
+    if (confirm(lang === 'en' ? 'Are you sure you want to delete this category and all its items?' : "هل أنت تأكد من حذف القسم بكافة منتجاته؟")) {
+      await fetch(buildApiUrl(`/categories/${id}`), { method: 'DELETE' });
+      loadAdminData();
+    }
+  }
+
+  async function deleteCategoryImage(catId) {
+    const lang = localStorage.getItem('menu_language') || 'ar';
+    if (confirm(lang === 'en' ? 'Delete category image?' : "هل أنت تأكد من حذف صورة القسم؟")) {
+      await fetch(buildApiUrl(`/categories/${catId}/image`), { method: 'DELETE' });
+      loadAdminData();
+    }
+  }
+
+  async function addItem(catId) {
+    const name = document.getElementById(`new-item-ar-${catId}`).value;
+    const name_en = document.getElementById(`new-item-en-${catId}`).value;
+    const price = document.getElementById(`new-item-price-${catId}`).value;
+    const description = document.getElementById(`new-item-desc-${catId}`).value;
+    const description_en = document.getElementById(`new-item-desc-en-${catId}`).value;
+    const imageFile = document.getElementById(`new-item-img-${catId}`).files[0];
+
+    const lang = localStorage.getItem('menu_language') || 'ar';
+    if (!name || !price) return alert(lang === 'en' ? 'Name and Price are required!' : "الاسم والسعر مطلوبان!");
+
+    const formData = new FormData();
+    formData.append('name', name);
+    formData.append('name_en', name_en);
+    formData.append('price', price);
+    formData.append('description', description);
+    formData.append('description_en', description_en);
+    if (storeSlug) formData.append('store', storeSlug);
+    if (imageFile) formData.append('image', imageFile);
+
+    try {
+      const res = await fetch(buildApiUrl(`/categories/${catId}/items`), { method: 'POST', body: formData });
+      if (res.ok) loadAdminData();
+    } catch (err) { console.error(err); }
+  }
+
+  async function updateItem(catId, itemId) {
+    const formData = new FormData();
+    formData.append('name', document.getElementById(`name-${itemId}`).value);
+    formData.append('name_en', document.getElementById(`en-${itemId}`).value);
+    formData.append('price', document.getElementById(`price-${itemId}`).value);
+    formData.append('description', document.getElementById(`desc-${itemId}`).value);
+    formData.append('description_en', document.getElementById(`desc-en-${itemId}`).value);
+    if (storeSlug) formData.append('store', storeSlug);
+
+    const itemImageFile = document.getElementById(`item-img-${itemId}`).files[0];
+    if (itemImageFile) formData.append('image', itemImageFile);
+
+    try {
+      const res = await fetch(buildApiUrl(`/categories/${catId}/items/${itemId}`), { method: 'PUT', body: formData });
+      const lang = localStorage.getItem('menu_language') || 'ar';
+      if (res.ok) {
+        alert(lang === 'en' ? 'Item updated successfully!' : "تم حفظ التعديلات والصورة بنجاح!");
+        loadAdminData();
+      }
+    } catch (err) { console.error(err); }
+  }
+
+  async function deleteItem(catId, itemId) {
+    const lang = localStorage.getItem('menu_language') || 'ar';
+    if (confirm(lang === 'en' ? 'Delete this item?' : "حذف هذا الصنف؟")) {
+      await fetch(buildApiUrl(`/categories/${catId}/items/${itemId}`), { method: 'DELETE' });
+      loadAdminData();
+    }
+  }
+
+  async function deleteItemImage(catId, itemId) {
+    const lang = localStorage.getItem('menu_language') || 'ar';
+    if (confirm(lang === 'en' ? 'Delete item image?' : "هل أنت تأكد من حذف صورة هذا المنتج؟")) {
+      await fetch(buildApiUrl(`/categories/${catId}/items/${itemId}/image`), { method: 'DELETE' });
+      loadAdminData();
+    }
+  }
+
+  window.addEventListener('DOMContentLoaded', () => {
+    applyAdminTranslations();
+    loadSettings();
+  });
+</script>
+</body>
+</html>
