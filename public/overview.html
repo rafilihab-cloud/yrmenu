@@ -5,7 +5,7 @@
   <link rel="apple-touch-icon" href="images/logo1.png">
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Home Page</title>
+  <title>YRmenu - نظرة عامة عن الشركة | Company Overview</title>
   
   <!-- Font Awesome Icons -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
@@ -13,290 +13,636 @@
   <!-- Google Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&family=Tajawal:wght@400;500;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Tajawal:wght@400;500;700;800&display=swap" rel="stylesheet">
   
-  <!-- Custom CSS -->
-  <link rel="stylesheet" href="style.css" />
-
   <style>
-    body.home-page {
-      position: relative;
-      min-height: 100vh;
+    :root {
+      --primary: #0f2537;
+      --secondary: #e5d5be;
+      --bg-dark: #000000;
+      --card-bg: rgba(15, 37, 55, 0.6);
+      --text-light: #ffffff;
+      --text-muted: #a0aec0;
+    }
+
+    * {
+      box-sizing: border-box;
       margin: 0;
-      overflow-x: hidden;
-      background-color: #000; /* خلفية سوداء أساسية لمنع ظهور أي فراغات أو ألوان غريبة */
+      padding: 0;
     }
 
-    .hero-video-bg {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-      z-index: -2;
-      display: none;
-    }
-
-    .video-overlay {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: rgba(0, 0, 0, 0.4); /* تعتيم متساوي لتغطية الخلفية بالكامل وإخفاء العيوب */
-      z-index: -1;
-      display: none;
-    }
-
-    .home-header {
-      position: relative;
-      z-index: 999;
-      pointer-events: auto !important;
-    }
-
-    .hero-content {
-      position: relative;
-      z-index: 10;
+    body {
+      font-family: 'Tajawal', 'Plus Jakarta Sans', sans-serif;
+      background-color: var(--bg-dark);
+      color: var(--text-light);
       min-height: 100vh;
+      overflow-x: hidden;
+      position: relative;
+    }
+
+    .bg-glow {
+      position: absolute;
+      top: -200px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 600px;
+      height: 600px;
+      background: radial-gradient(circle, rgba(15, 37, 55, 0.8) 0%, rgba(0, 0, 0, 0) 70%);
+      z-index: -1;
+      pointer-events: none;
+    }
+
+    /* تثبيت الشعار دائماً على اليسار */
+    header {
       display: flex;
-      flex-direction: column;
-      justify-content: center;
+      justify-content: space-between;
       align-items: center;
-      padding: 80px 20px 30px 20px; /* إضافة مساحة علوية لمنع تداخل المحتوى مع زر اللغات */
-      box-sizing: border-box;
+      padding: 20px 40px;
+      position: relative;
+      z-index: 100;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+      direction: ltr !important;
     }
 
-    .hero-texts-wrapper {
-      background: transparent;
-      isolation: isolate;
-      text-align: center;
-      margin-bottom: 25px;
-      width: 100%;
-      max-width: 600px;
-    }
-
-    .hero-actions-wrapper {
+    .logo-area {
       display: flex;
-      flex-direction: column;
       align-items: center;
-      background: transparent;
-      isolation: isolate;
-      width: 100%;
-      max-width: 400px;
-      gap: 15px; /* مسافات منتظمة بين الأزرار والعناصر */
+      gap: 12px;
+      text-decoration: none;
+      color: var(--text-light);
+      font-weight: 700;
+      font-size: 20px;
     }
 
-    /* تحسين تجاوب الأزرار وأيقونات التواصل على الهواتف */
-    .menu-action-btn {
-      width: 100%;
-      max-width: 280px;
-      box-sizing: border-box;
-      justify-content: center;
-      text-align: center;
-    }
-
-    .social-icons {
-      display: flex;
-      flex-wrap: wrap;
-      justify-content: center;
-      gap: 10px;
-      margin-top: 5px;
-    }
-
-    .brand-badge {
-      background-color: #ffffff !important;
-      color: #000000 !important;
-      display: inline-flex !important;
-      align-items: center !important;
-      gap: 6px !important;
-      text-decoration: none !important;
-      cursor: pointer;
-      transition: opacity 0.2s ease;
-      margin-top: 5px;
-      padding: 6px 14px;
-      border-radius: 50px;
-    }
-
-    .brand-badge:hover {
-      opacity: 0.9;
-    }
-
-    .brand-badge img {
-      width: 16px;
-      height: 16px;
+    .logo-area img {
+      width: 36px;
+      height: 36px;
       object-fit: contain;
       border-radius: 50%;
     }
 
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+    }
+
+    .back-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 18px;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      border-radius: 50px;
+      color: var(--text-light);
+      text-decoration: none;
+      font-size: 14px;
+      font-weight: 600;
+      transition: all 0.3s ease;
+    }
+
+    .back-btn:hover {
+      background: var(--secondary);
+      color: var(--primary);
+      border-color: var(--secondary);
+    }
+
+    /* زر تغيير اللغة */
     .lang-dropdown {
-      position: fixed !important;
-      top: 15px !important;
-      left: 15px !important;
-      right: auto !important;
-      z-index: 99999 !important;
-      pointer-events: auto !important;
+      position: relative;
+      z-index: 999;
     }
 
     .lang-btn {
       display: flex;
       align-items: center;
       gap: 8px;
-      padding: 6px 14px;
+      padding: 8px 16px;
       border-radius: 50px;
-      background-color: var(--primary, #0f2537) !important;
-      color: #ffffff !important;
+      background-color: var(--primary);
+      color: #ffffff;
       border: 1px solid rgba(255, 255, 255, 0.2);
       cursor: pointer;
       font-family: inherit;
-      font-size: 13px;
+      font-size: 14px;
       font-weight: 600;
       transition: all 0.3s ease;
-      user-select: none;
-      -webkit-tap-highlight-color: transparent;
-      pointer-events: auto !important;
     }
 
     .lang-btn:hover {
-      background-color: var(--secondary, #e5d5be) !important;
-      color: var(--primary, #0f2537) !important;
+      background-color: var(--secondary);
+      color: var(--primary);
     }
 
     .lang-menu {
       position: absolute;
-      top: calc(100% + 6px);
+      top: calc(100% + 8px);
       left: 0;
-      right: auto;
-      background-color: #ffffff !important;
+      background-color: #ffffff;
       border-radius: 12px;
       box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
       list-style: none;
       padding: 6px 0;
       margin: 0;
-      min-width: 130px;
+      min-width: 140px;
       display: none;
-      z-index: 99999 !important;
+      z-index: 9999;
       overflow: hidden;
       border: 1px solid rgba(0, 0, 0, 0.1);
-      pointer-events: auto !important;
+      text-align: left;
     }
 
     .lang-menu.show {
-      display: block !important;
+      display: block;
     }
 
     .lang-menu li {
-      padding: 8px 14px;
-      color: #333333 !important;
-      font-size: 13px;
+      padding: 10px 16px;
+      color: #333333;
+      font-size: 14px;
       font-weight: 600;
       cursor: pointer;
       transition: background 0.2s ease, color 0.2s ease;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      user-select: none;
     }
 
     .lang-menu li:hover {
-      background-color: #f3f4f6 !important;
-      color: var(--primary, #0f2537) !important;
+      background-color: #f3f4f6;
+      color: var(--primary);
     }
 
     .lang-menu li.active {
-      color: var(--primary, #0f2537) !important;
+      color: var(--primary);
       font-weight: 700;
-      background-color: #eef2f6 !important;
+      background-color: #eef2f6;
     }
 
-    /* تعديلات استجابة إضافية للشاشات الصغيرة جداً */
+    .container {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 60px 20px;
+      position: relative;
+      z-index: 10;
+    }
+
+    .hero-section {
+      text-align: center;
+      margin-bottom: 60px;
+    }
+
+    .badge-tag {
+      display: inline-block;
+      padding: 6px 16px;
+      background: rgba(229, 213, 190, 0.1);
+      color: var(--secondary);
+      border-radius: 30px;
+      font-size: 13px;
+      font-weight: 600;
+      margin-bottom: 15px;
+      border: 1px solid rgba(229, 213, 190, 0.3);
+    }
+
+    .hero-section h1 {
+      font-size: 42px;
+      font-weight: 800;
+      margin-bottom: 20px;
+      background: linear-gradient(135deg, #ffffff 0%, #a0aec0 100%);
+      background-clip: text;
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .hero-section p {
+      font-size: 18px;
+      color: var(--text-muted);
+      max-width: 700px;
+      margin: 0 auto;
+      line-height: 1.6;
+    }
+
+    .features-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 25px;
+      margin-bottom: 60px;
+    }
+
+    .feature-card {
+      background: var(--card-bg);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 20px;
+      padding: 35px 30px;
+      backdrop-filter: blur(10px);
+      transition: transform 0.3s ease, border-color 0.3s ease;
+    }
+
+    .feature-card:hover {
+      transform: translateY(-5px);
+      border-color: rgba(229, 213, 190, 0.4);
+    }
+
+    .feature-icon {
+      width: 55px;
+      height: 55px;
+      background: rgba(229, 213, 190, 0.1);
+      border-radius: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--secondary);
+      font-size: 24px;
+      margin-bottom: 20px;
+    }
+
+    .feature-card h3 {
+      font-size: 20px;
+      font-weight: 700;
+      margin-bottom: 12px;
+      color: #fff;
+    }
+
+    .feature-card p {
+      font-size: 15px;
+      color: var(--text-muted);
+      line-height: 1.6;
+    }
+
+    .stats-section {
+      background: linear-gradient(135deg, rgba(15, 37, 55, 0.4) 0%, rgba(0,0,0,0.8) 100%);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 24px;
+      padding: 40px;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 30px;
+      text-align: center;
+      margin-bottom: 60px;
+    }
+
+    .stat-item h2 {
+      font-size: 36px;
+      font-weight: 800;
+      color: var(--secondary);
+      margin-bottom: 8px;
+    }
+
+    .stat-item p {
+      font-size: 14px;
+      color: var(--text-muted);
+      font-weight: 500;
+    }
+
+    .vision-mission {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+      gap: 30px;
+    }
+
+    .vm-box {
+      background: rgba(255, 255, 255, 0.02);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      border-radius: 20px;
+      padding: 35px;
+    }
+
+    .vm-box h3 {
+      font-size: 22px;
+      font-weight: 700;
+      margin-bottom: 15px;
+      color: var(--secondary);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .vm-box p {
+      font-size: 15px;
+      color: var(--text-muted);
+      line-height: 1.7;
+    }
+
+    footer {
+      text-align: center;
+      padding: 30px;
+      border-top: 1px solid rgba(255, 255, 255, 0.08);
+      color: var(--text-muted);
+      font-size: 14px;
+      margin-top: 40px;
+    }
+
+    /* تحسينات التصميم المتجاوب للشاشات الصغيرة والهواتف */
+    @media (max-width: 768px) {
+      header {
+        padding: 12px 16px;
+      }
+
+      .logo-area {
+        font-size: 17px;
+        gap: 8px;
+      }
+
+      .logo-area img {
+        width: 30px;
+        height: 30px;
+      }
+
+      .header-actions {
+        gap: 10px;
+      }
+
+      .back-btn {
+        padding: 6px 12px;
+        font-size: 12px;
+      }
+
+      .lang-btn {
+        padding: 6px 12px;
+        font-size: 12px;
+      }
+
+      .container {
+        padding: 35px 16px;
+      }
+
+      .hero-section {
+        margin-bottom: 40px;
+      }
+
+      .hero-section h1 {
+        font-size: 26px;
+        line-height: 1.3;
+        margin-bottom: 15px;
+      }
+
+      .hero-section p {
+        font-size: 15px;
+      }
+
+      .badge-tag {
+        font-size: 12px;
+        padding: 5px 12px;
+      }
+
+      .stats-section {
+        padding: 25px 15px;
+        gap: 20px;
+        margin-bottom: 40px;
+      }
+
+      .stat-item h2 {
+        font-size: 28px;
+      }
+
+      .features-grid {
+        grid-template-columns: 1fr;
+        gap: 20px;
+        margin-bottom: 40px;
+      }
+
+      .feature-card {
+        padding: 25px 20px;
+      }
+
+      .vision-mission {
+        grid-template-columns: 1fr;
+        gap: 20px;
+      }
+
+      .vm-box {
+        padding: 25px 20px;
+      }
+
+      .vm-box h3 {
+        font-size: 19px;
+      }
+    }
+
+    /* شاشات الهواتف الضيقة جداً */
     @media (max-width: 480px) {
-      .hero-content {
-        padding: 70px 15px 20px 15px;
+      header {
+        padding: 10px 12px;
       }
-      .hero-title {
-        font-size: 26px !important;
-      }
-      .hero-subtitle, .hero-tagline {
-        font-size: 14px !important;
+      .logo-area span {
+        display: none; /* إخفاء اسم YRmenu في الهواتف الصغيرة جداً والاكتفاء بالشعار لضمان عدم الازدحام */
       }
     }
   </style>
 </head>
-<body class="home-page">
+<body>
 
-  <!-- فيديو الخلفية -->
-  <video id="bg-video-player" class="hero-video-bg" autoplay loop muted playsinline>
-    <source id="bg-video-source" src="" type="video/mp4">
-  </video>
-  <div id="video-overlay" class="video-overlay"></div>
+  <div class="bg-glow"></div>
 
-  <!-- Header / Navigation -->
-  <header class="home-header">
-    <div class="lang-dropdown">
-      <button class="lang-btn" id="langBtn" type="button">
-        <i class="fa-solid fa-globe"></i>
-        <span id="currentLangText">العربية</span>
-        <i class="fa-solid fa-chevron-down" style="font-size: 10px;"></i>
-      </button>
-      <ul class="lang-menu" id="langMenu">
-        <li data-lang="ar" id="opt-ar">العربية</li>
-        <li data-lang="en" id="opt-en">English</li>
-      </ul>
+  <!-- Header -->
+  <header>
+    <!-- اللوكو يحافظ على نقل الـ slug تلقائياً -->
+    <a href="index.html" class="logo-area" id="logoLink">
+      <img src="images/logo1.png" alt="YRmenu Logo">
+      <span>YRmenu</span>
+    </a>
+    
+    <div class="header-actions">
+      <!-- Lang Dropdown -->
+      <div class="lang-dropdown">
+        <button class="lang-btn" id="langBtn" type="button">
+          <i class="fa-solid fa-globe"></i>
+          <span id="currentLangText">العربية</span>
+          <i class="fa-solid fa-chevron-down" style="font-size: 11px;"></i>
+        </button>
+        <ul class="lang-menu" id="langMenu">
+          <li data-lang="ar" id="opt-ar" class="active">العربية</li>
+          <li data-lang="en" id="opt-en">English</li>
+        </ul>
+      </div>
+
+      <!-- زر الرئيسية (Home) يحافظ على نقل الـ slug -->
+      <a href="index.html" class="back-btn" id="nav-back">
+        <i class="fa-solid fa-arrow-right" id="back-arrow"></i>
+        <span id="txt-back">الرئيسية</span>
+      </a>
     </div>
   </header>
 
-  <!-- Hero Content Section -->
-  <main class="hero-content">
-    <div class="hero-texts-wrapper">
-      <p class="hero-subtitle" id="txt-subtitle"></p>
-      <h1 class="hero-title" id="display-res-name"></h1>
-      <p class="hero-tagline" id="txt-tagline"></p>
+  <!-- Main Content -->
+  <div class="container">
+    
+    <!-- Hero Section -->
+    <div class="hero-section">
+      <span class="badge-tag" id="txt-badge">نظرة عامة على الشركة</span>
+      <h1 id="txt-title">ابتكار رقمي يعيد صياغة قطاع الضيافة</h1>
+      <p id="txt-desc">نحن في YRmenu نؤمن بأن تجربة العميل تبدأ من اللحظة الأولى. نهدف إلى تمكين المطاعم والمقاهي من التحول الرقمي الكامل من خلال قوائم طعام تفاعلية ذكية وسريعة.</p>
     </div>
 
-    <div class="hero-actions-wrapper">
-      <a href="menu.html" class="menu-action-btn">
-        <span id="txt-btn-menu">عرض المنيو</span>
-        <i class="fa-solid fa-arrow-left" id="btn-arrow"></i>
-      </a>
+    <!-- Stats -->
+    <div class="stats-section">
+      <div class="stat-item">
+        <h2 id="stat1-val">+0</h2>
+        <p id="txt-stat1">مطعم ومقاهي نشطة</p>
+      </div>
+      <div class="stat-item">
+        <h2 id="stat2-val">0.0%</h2>
+        <p id="txt-stat2">استقرار ووقت تشغيل الخدمة</p>
+      </div>
+      <div class="stat-item">
+        <h2>24/7</h2>
+        <p id="txt-stat3">دعم فني وتطوير مستمر</p>
+      </div>
+    </div>
 
-      <div class="social-icons" id="socialIconsContainer" style="display: none;">
-        <!-- سيتم تعبئة الأيقونات ديناميكياً حسب ما يتم إضافته من صفحة الـ admin -->
+    <!-- Features Grid -->
+    <div class="features-grid">
+      <div class="feature-card">
+        <div class="feature-icon">
+          <i class="fa-solid fa-bolt"></i>
+        </div>
+        <h3 id="txt-feat1-title">سرعة فائقة وأداء عالي</h3>
+        <p id="txt-feat1-desc">تم تصميم منصتنا بعناية فائقة لتوفير تجربة تصفح سلسة وسريعة جداً للزوار دون أي تأخير أو استهلاك كبير للبيانات.</p>
       </div>
 
-      <a href="overview.html" class="brand-badge" id="brandBadgeLink">
-        <img src="images/logo1.png" alt="Logo">
-        <span>YRmenu</span>
-      </a>
+      <div class="feature-card">
+        <div class="feature-icon">
+          <i class="fa-solid fa-sliders"></i>
+        </div>
+        <h3 id="txt-feat2-title">لوحة تحكم مرنة وشاملة</h3>
+        <p id="txt-feat2-desc">تحكم كامل بإدارة الأقسام، الأطباق، الأسعار، الفيديوهات الخلفية، وروابط وسائل التواصل الاجتماعي بكل سهولة وآنياً.</p>
+      </div>
+
+      <div class="feature-card">
+        <div class="feature-icon">
+          <i class="fa-solid fa-globe"></i>
+        </div>
+        <h3 id="txt-feat3-title">دعم متعدد اللغات</h3>
+        <p id="txt-feat3-desc">تتيح المنصة للعملاء التبديل السلس بين اللغة العربية والإنجليزية لخدمة أوسع شريحة ممكنة من الزوار والسياح.</p>
+      </div>
     </div>
-  </main>
 
-  <!-- JavaScript Code -->
+    <!-- Vision & Mission -->
+    <div class="vision-mission">
+      <div class="vm-box">
+        <h3><i class="fa-solid fa-eye"></i> <span id="txt-vision-title">رؤيتنا</span></h3>
+        <p id="txt-vision-desc">أن نكون المنصة الرائدة والأولى في المنطقة لتقديم حلول القوائم الرقمية الذكية، والمساهمة الفعالة في تطوير القطاع السياحي والغذائي عبر تقنيات حديثة ومبتكرة.</p>
+      </div>
+      <div class="vm-box">
+        <h3><i class="fa-solid fa-bullseye"></i> <span id="txt-mission-title">رسالتنا</span></h3>
+        <p id="txt-mission-desc">تسهيل التواصل بين المطاعم وعملائهم عبر تقنيات رقمية أنيقة، موثوقة، وسهلة الاستخدام، مع الالتزام بأعلى معايير الجودة والاحترافية في الدعم الفني.</p>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Footer -->
+  <footer>
+    <p id="txt-footer">&copy; 2026 YRmenu. جميع الحقوق محفوظة.</p>
+  </footer>
+
+  <!-- JavaScript -->
   <script>
-    const API_URL = '/api';
-
-    // استخراج معرف المطعم (store أو slug) من الـ URL
-    const urlParams = new URLSearchParams(window.location.search);
-    const storeSlug = urlParams.get('store') || urlParams.get('slug');
-
     const translations = {
       ar: {
-        subtitle: "أهلاً بكم في",
-        tagline: "طعم لا يُنسى وذكريات جميلة",
-        btnMenu: "عرض المنيو"
+        back: "الرئيسية",
+        badge: "نظرة عامة على الشركة",
+        title: "ابتكار رقمي يعيد صياغة قطاع الضيافة",
+        desc: "نحن في YRmenu نؤمن بأن تجربة العميل تبدأ من اللحظة الأولى. نهدف إلى تمكين المطاعم والمقاهي من التحول الرقمي الكامل من خلال قوائم طعام تفاعلية ذكية وسريعة.",
+        stat1: "مطعم ومقاهي نشطة",
+        stat2: "استقرار ووقت تشغيل الخدمة",
+        stat3: "دعم فني وتطوير مستمر",
+        feat1Title: "سرعة فائقة وأداء عالي",
+        feat1Desc: "تم تصميم منصتنا بعناية فائقة لتوفير تجربة تصفح سلسة وسريعة جداً للزوار دون أي تأخير أو استهلاك كبير للبيانات.",
+        feat2Title: "لوحة تحكم مرنة وشاملة",
+        feat2Desc: "تحكم كامل بإدارة الأقسام، الأطباق، الأسعار، الفيديوهات الخلفية، وروابط وسائل التواصل الاجتماعي بكل سهولة وآنياً.",
+        feat3Title: "دعم متعدد اللغات",
+        feat3Desc: "تتيح المنصة للعملاء التبديل السلس بين اللغة العربية والإنجليزية لخدمة أوسع شريحة ممكنة من الزوار والسياح.",
+        visionTitle: "رؤيتنا",
+        visionDesc: "أن نكون المنصة الرائدة والأولى في المنطقة لتقديم حلول القوائم الرقمية الذكية، والمساهمة الفعالة في تطوير القطاع السياحي والغذائي عبر تقنيات حديثة ومبتكرة.",
+        missionTitle: "رسالتنا",
+        missionDesc: "تسهيل التواصل بين المطاعم وعملائهم عبر تقنيات رقمية أنيقة، موثوقة، وسهلة الاستخدام، مع الالتزام بأعلى معايير الجودة والاحترافية في الدعم الفني.",
+        footer: "&copy; 2026 YRmenu. جميع الحقوق محفوظة.",
+        arrowDir: "fa-arrow-right"
       },
       en: {
-        subtitle: "",
-        tagline: "",
-        btnMenu: "View Menu"
+        back: "Home",
+        badge: "Company Overview",
+        title: "Digital Innovation Reshaping Hospitality",
+        desc: "At YRmenu, we believe customer experience starts from the very first moment. We aim to empower restaurants and cafes with full digital transformation through smart, fast, interactive menus.",
+        stat1: "Active Restaurants & Cafes",
+        stat2: "Uptime & Reliability",
+        stat3: "24/7 Support & Updates",
+        feat1Title: "Lightning Fast & High Performance",
+        feat1Desc: "Our platform is carefully engineered to deliver a seamless and ultra-fast browsing experience for visitors without any lag or high data usage.",
+        feat2Title: "Flexible & Comprehensive Admin Panel",
+        feat2Desc: "Complete control over managing categories, dishes, prices, background videos, and social media links instantly and easily.",
+        feat3Title: "Multi-language Support",
+        feat3Desc: "The platform enables customers to switch seamlessly between Arabic and English to serve the widest possible range of visitors and tourists.",
+        visionTitle: "Our Vision",
+        visionDesc: "To be the leading and premier platform in the region for smart digital menu solutions, actively contributing to the development of the tourism and culinary sector through innovative technologies.",
+        missionTitle: "Our Mission",
+        missionDesc: "Facilitating communication between restaurants and their customers via elegant, reliable, and user-friendly digital technologies, committed to the highest standards of quality and professional support.",
+        footer: "&copy; 2026 YRmenu. All rights reserved.",
+        arrowDir: "fa-arrow-left"
       }
     };
+
+    function getStoreSlug() {
+      const urlParams = new URLSearchParams(window.location.search);
+      let store = urlParams.get('store') || urlParams.get('slug');
+      
+      if (!store) {
+        const pathSegments = window.location.pathname.split('/').filter(Boolean);
+        if (pathSegments.length > 1 && pathSegments[pathSegments.length - 1].includes('overview')) {
+          store = pathSegments[pathSegments.length - 2];
+        }
+      }
+      return store;
+    }
+
+    function setupLinks() {
+      const storeSlug = getStoreSlug();
+      if (storeSlug) {
+        const homeUrl = `index.html?store=${encodeURIComponent(storeSlug)}`;
+        document.getElementById('logoLink').setAttribute('href', homeUrl);
+        document.getElementById('nav-back').setAttribute('href', homeUrl);
+      }
+    }
+
+    function runCounters() {
+      const stat1El = document.getElementById('stat1-val');
+      let current1 = 0;
+      const target1 = 100;
+      const duration1 = 1500;
+      const stepTime1 = Math.abs(Math.floor(duration1 / target1));
+      
+      const timer1 = setInterval(() => {
+        current1 += 2;
+        if (current1 >= target1) {
+          current1 = target1;
+          clearInterval(timer1);
+        }
+        stat1El.innerText = "+" + current1;
+      }, stepTime1);
+
+      const stat2El = document.getElementById('stat2-val');
+      let current2 = 0;
+      const target2 = 99.9;
+      const duration2 = 1500;
+      const steps2 = 50;
+      const increment2 = target2 / steps2;
+      const stepTime2 = duration2 / steps2;
+
+      const timer2 = setInterval(() => {
+        current2 += increment2;
+        if (current2 >= target2) {
+          current2 = target2;
+          clearInterval(timer2);
+        }
+        stat2El.innerText = current2.toFixed(1) + "%";
+      }, stepTime2);
+    }
 
     function applyLanguage(lang) {
       const htmlEl = document.documentElement;
       const currentLangText = document.getElementById('currentLangText');
       const optAr = document.getElementById('opt-ar');
       const optEn = document.getElementById('opt-en');
+      const t = translations[lang];
 
       if (lang === 'en') {
         htmlEl.setAttribute('dir', 'ltr');
@@ -312,22 +658,31 @@
         if (optAr) optAr.classList.add('active');
       }
 
-      if (window.appSettings) {
-        updatePageTexts(window.appSettings, lang);
+      document.getElementById('txt-back').innerText = t.back;
+      document.getElementById('txt-badge').innerText = t.badge;
+      document.getElementById('txt-title').innerText = t.title;
+      document.getElementById('txt-desc').innerText = t.desc;
+      document.getElementById('txt-stat1').innerText = t.stat1;
+      document.getElementById('txt-stat2').innerText = t.stat2;
+      document.getElementById('txt-stat3').innerText = t.stat3;
+      document.getElementById('txt-feat1-title').innerText = t.feat1Title;
+      document.getElementById('txt-feat1-desc').innerText = t.feat1Desc;
+      document.getElementById('txt-feat2-title').innerText = t.feat2Title;
+      document.getElementById('txt-feat2-desc').innerText = t.feat2Desc;
+      document.getElementById('txt-feat3-title').innerText = t.feat3Title;
+      document.getElementById('txt-feat3-desc').innerText = t.feat3Desc;
+      document.getElementById('txt-vision-title').innerText = t.visionTitle;
+      document.getElementById('txt-vision-desc').innerText = t.visionDesc;
+      document.getElementById('txt-mission-title').innerText = t.missionTitle;
+      document.getElementById('txt-mission-desc').innerText = t.missionDesc;
+      document.getElementById('txt-footer').innerHTML = t.footer;
+
+      const backArrow = document.getElementById('back-arrow');
+      if (backArrow) {
+        backArrow.className = `fa-solid ${t.arrowDir}`;
       }
 
       localStorage.setItem('selectedLang', lang);
-    }
-
-    function updatePageTexts(settings, lang) {
-      if (lang === 'en') {
-        document.getElementById('txt-subtitle').innerText = settings.welcomeText_en || settings.welcomeText || translations.en.subtitle;
-        document.getElementById('txt-tagline').innerText = settings.subTitle_en || settings.subTitle || translations.en.tagline;
-      } else {
-        document.getElementById('txt-subtitle').innerText = settings.welcomeText || translations.ar.subtitle;
-        document.getElementById('txt-tagline').innerText = settings.subTitle || translations.ar.tagline;
-      }
-      document.getElementById('txt-btn-menu').innerText = (lang === 'en') ? translations.en.btnMenu : translations.ar.btnMenu;
     }
 
     const langBtn = document.getElementById('langBtn');
@@ -360,144 +715,11 @@
       });
     }
 
-    async function loadHomeSettings() {
-      try {
-        let apiUrl = `${API_URL}/settings?t=${new Date().getTime()}`;
-        if (storeSlug) {
-          apiUrl += `&store=${encodeURIComponent(storeSlug)}`;
-        }
-
-        const res = await fetch(apiUrl, {
-          cache: 'no-store'
-        });
-        if (!res.ok) throw new Error("فشل جلب البيانات من السيرفر");
-        
-        const settings = await res.json();
-        window.appSettings = settings;
-
-        if (settings) {
-          const status = (settings.subscriptionStatus || settings.status || settings.subscription_status || '').toLowerCase();
-          const isActive = settings.isActive !== undefined ? settings.isActive : settings.is_active;
-          const isDisabled = status === 'disabled' || status === 'inactive' || status === 'expired' || isActive === false || settings.disabled === true;
-
-          const expiry = settings.expiryDate || settings.expiry_date || settings.expirationDate;
-          let isExpired = false;
-          if (expiry) {
-            const today = new Date().toISOString().split('T')[0];
-            const expiryFormatted = new Date(expiry).toISOString().split('T')[0];
-            if (expiryFormatted < today) {
-              isExpired = true;
-            }
-          }
-
-          if (isDisabled || isExpired) {
-            document.body.innerHTML = `
-              <div style="text-align: center; padding: 50px 20px; font-family: system-ui, -apple-system, sans-serif; direction: rtl; min-height: 100vh; display: flex; flex-direction: column; justify-content: center; align-items: center; background: #fff; color: #333;">
-                <h1 style="font-size: 48px; margin-bottom: 10px;">⚠</h1>
-                <h2 style="color: #e74c3c; margin-bottom: 10px;">عذراً، الخدمة غير متاحة حالياً</h2>
-                <p style="color: #666; max-width: 400px; line-height: 1.6;">تم إيقاف المنيو مؤقتاً بسبب انتهاء فترة الاشتراك أو للتعطيل الصيانة. يرجى مراجعة إدارة المطعم.</p>
-              </div>
-            `;
-            return;
-          }
-
-          if (settings.restaurantName) {
-            document.getElementById('display-res-name').innerText = settings.restaurantName;
-          }
-
-          const currentLang = localStorage.getItem('selectedLang') || 'ar';
-          updatePageTexts(settings, currentLang);
-
-          // ضبط رابط زر المنيو ليبقى مرتبطاً بنفس المطعم
-          const menuBtn = document.querySelector('.menu-action-btn');
-          if (menuBtn) {
-            menuBtn.href = storeSlug ? `menu.html?store=${encodeURIComponent(storeSlug)}` : 'menu.html';
-          }
-
-          // ضبط رابط شعار YRmenu ليبقى مرتبطاً بنفس المطعم وينتقل إلى overview.html
-          const brandBadgeLink = document.getElementById('brandBadgeLink');
-          if (brandBadgeLink) {
-            brandBadgeLink.href = storeSlug ? `overview.html?store=${encodeURIComponent(storeSlug)}` : 'overview.html';
-          }
-
-          // التعامل مع أيقونات مواقع التواصل الاجتماعي بحيث تظهر فقط عند إضافتها
-          const socialContainer = document.getElementById('socialIconsContainer');
-          if (socialContainer) {
-            let socialHTML = '';
-            const socials = [
-              { key: 'whatsapp', icon: 'fa-brands fa-whatsapp', val: settings.whatsapp || settings.whatsappUrl },
-              { key: 'snapchat', icon: 'fa-brands fa-snapchat', val: settings.snapchat || settings.snapchatUrl },
-              { key: 'instagram', icon: 'fa-brands fa-instagram', val: settings.instagram || settings.instagramUrl },
-              { key: 'facebook', icon: 'fa-brands fa-facebook', val: settings.facebook || settings.facebookUrl },
-              { key: 'twitter', icon: 'fa-brands fa-twitter', val: settings.twitter || settings.twitterUrl },
-              { key: 'tiktok', icon: 'fa-brands fa-tiktok', val: settings.tiktok || settings.tiktokUrl },
-              { key: 'telegram', icon: 'fa-brands fa-telegram', val: settings.telegram || settings.telegramUrl },
-              { key: 'phone', icon: 'fa-solid fa-phone', val: settings.phone || settings.phoneUrl }
-            ];
-
-            socials.forEach(item => {
-              if (item.val && item.val.trim() !== '') {
-                let link = item.val;
-                if (item.key === 'whatsapp' && !link.startsWith('http') && !link.startsWith('tel:')) {
-                  link = `https://wa.me/${link}`;
-                } else if (item.key === 'phone' && !link.startsWith('tel:')) {
-                  link = `tel:${link}`;
-                }
-                socialHTML += `<a href="${link}" target="_blank" class="social-btn"><i class="${item.icon}"></i></a>`;
-              }
-            });
-
-            if (socialHTML !== '') {
-              socialContainer.innerHTML = socialHTML;
-              socialContainer.style.display = 'flex';
-            } else {
-              socialContainer.innerHTML = '';
-              socialContainer.style.display = 'none';
-            }
-          }
-
-          const videoPlayer = document.getElementById('bg-video-player');
-          const videoSource = document.getElementById('bg-video-source');
-          const videoOverlay = document.getElementById('video-overlay');
-
-          if (settings.heroVideoUrl) {
-            const videoUrl = (settings.heroVideoUrl.startsWith('data:') || settings.heroVideoUrl.startsWith('http')) 
-              ? settings.heroVideoUrl 
-              : (settings.heroVideoUrl.startsWith('/') ? settings.heroVideoUrl : `/${settings.heroVideoUrl}`);
-              
-            videoSource.src = videoUrl;
-            videoPlayer.load();
-            videoPlayer.style.display = 'block';
-            if (videoOverlay) videoOverlay.style.display = 'block';
-            document.body.style.backgroundImage = 'none';
-          } else if (settings.heroBgUrl) {
-            const bgUrl = (settings.heroBgUrl.startsWith('data:') || settings.heroBgUrl.startsWith('http'))
-              ? settings.heroBgUrl
-              : (settings.heroBgUrl.startsWith('/') ? settings.heroBgUrl : `/${settings.heroBgUrl}`);
-              
-            videoPlayer.style.display = 'none';
-            if (videoOverlay) videoOverlay.style.display = 'none';
-            document.body.style.backgroundImage = `url('${bgUrl}')`;
-            document.body.style.backgroundSize = 'cover';
-            document.body.style.backgroundPosition = 'center';
-            document.body.style.backgroundRepeat = 'no-repeat';
-          }
-
-          const root = document.documentElement;
-          if (settings.primaryColor) root.style.setProperty('--primary', settings.primaryColor);
-          if (settings.secondaryColor) root.style.setProperty('--secondary', settings.secondaryColor);
-          if (settings.cardBgColor) root.style.setProperty('--card-bg', settings.cardBgColor);
-          if (settings.textColor) root.style.setProperty('--text-dark', settings.textColor);
-        }
-      } catch (err) {
-        console.error("خطأ في تحميل إعدادات الصفحة الرئيسية:", err);
-      }
-    }
-
     window.addEventListener('DOMContentLoaded', () => {
       const savedLang = localStorage.getItem('selectedLang') || 'ar';
       applyLanguage(savedLang);
-      loadHomeSettings();
+      setupLinks();
+      runCounters();
     });
   </script>
 </body>
