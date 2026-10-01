@@ -119,7 +119,6 @@
           <input type="text" id="restaurant-password" placeholder="كلمة مرور restaurant-login.html">
         </div>
 
-        <!-- حقول إعدادات تيليجرام المضافة حديثاً -->
         <div>
           <label><small><b>توكين بوت تيليجرام (Bot Token):</b></small></label>
           <input type="text" id="telegram-bot-token" placeholder="أدخل Bot Token">
@@ -384,7 +383,6 @@
           document.getElementById('restaurant-password').value = settings.restaurantPassword;
         }
 
-        // جلب وعرض بيانات تيليجرام الحالية
         if (settings.telegramBotToken) {
           document.getElementById('telegram-bot-token').value = settings.telegramBotToken;
         }
@@ -426,11 +424,12 @@
           subInfo.innerHTML = `<span class="status-badge status-active">${lang === 'en' ? '🟢 Subscription active until ' : '🟢 الاشتراك فعال وسيستمر حتى '} ${settings.expiryDate ? settings.expiryDate.split('T')[0] : ''}</span>`;
         }
 
-        const videoUrl = settings.heroVideoUrl || (settings.heroBgUrl && settings.heroBgUrl.endsWith('.mp4') ? settings.heroBgUrl : null);
         const previewBox = document.getElementById('theme-preview');
         previewBox.innerHTML = `
           ${settings.logoUrl ? `<div class="preview-img-container"><small>الشعار:</small><br><img src="${settings.logoUrl}" class="preview-img"><button type="button" class="btn-remove-img" onclick="deleteThemeImage('logo')">حذف</button></div>` : ''}
           ${settings.bannerUrl ? `<div class="preview-img-container"><small>الغلاف:</small><br><img src="${settings.bannerUrl}" class="preview-img" style="width:120px;"><button type="button" class="btn-remove-img" onclick="deleteThemeImage('banner')">حذف</button></div>` : ''}
+          ${settings.heroBgUrl ? `<div class="preview-img-container"><small>خلفية الرئيسية:</small><br><img src="${settings.heroBgUrl}" class="preview-img"><button type="button" class="btn-remove-img" onclick="deleteThemeImage('heroBg')">حذف</button></div>` : ''}
+          ${settings.heroVideoUrl ? `<div class="preview-img-container"><small>فيديو الرئيسية:</small><br><video src="${settings.heroVideoUrl}" style="width:60px; height:60px; object-fit:cover; border-radius:8px;" muted></video><button type="button" class="btn-remove-img" onclick="deleteThemeImage('heroVideo')">حذف</button></div>` : ''}
         `;
       }
     } catch (err) {
@@ -445,7 +444,6 @@
     
     formData.append('restaurantPassword', document.getElementById('restaurant-password').value);
     
-    // إرفاق بيانات تيليجرام مع البيانات المرسلة للسيرفر
     formData.append('telegramBotToken', document.getElementById('telegram-bot-token').value);
     formData.append('telegramChatId', document.getElementById('telegram-chat-id').value);
 
@@ -463,6 +461,13 @@
     formData.append('categoriesBgColor', document.getElementById('categories-bg-color').value);
     formData.append('expiryDate', document.getElementById('expiry-date').value);
     formData.append('subscriptionStatus', document.getElementById('subscription-status').value);
+
+    // إضافة ملفات الخلفية وفيديو الرئيسية للسيرفر
+    const heroBg = document.getElementById('hero-bg-file').files[0];
+    const heroVideo = document.getElementById('hero-video-file').files[0];
+    if (heroBg) formData.append('heroBg', heroBg);
+    if (heroVideo) formData.append('heroVideo', heroVideo);
+
     if (storeSlug) formData.append('store', storeSlug);
   }
 
@@ -486,7 +491,7 @@
     if (banner) formData.append('banner', banner);
     try {
       const res = await fetch(buildApiUrl('/settings'), { method: 'POST', body: formData });
-      if (res.ok) { alert("تم حفظ مظهر المنيو وإعدادات التيليجرام وكلمة المرور بنجاح!"); loadSettings(); }
+      if (res.ok) { alert("تم حفظ مظهر المنيو وإعدادات الخلفيات والتيليجرام بنجاح!"); loadSettings(); }
     } catch (err) { console.error(err); }
   };
 
