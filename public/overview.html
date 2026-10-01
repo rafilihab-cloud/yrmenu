@@ -1,0 +1,642 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <link rel="icon" type="image/png" sizes="32x32" href="images/logo1.png">
+  <link rel="apple-touch-icon" href="images/logo1.png">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>YRmenu - نظرة عامة عن الشركة | Company Overview</title>
+  
+  <!-- Font Awesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+  
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Tajawal:wght@400;500;700;800&display=swap" rel="stylesheet">
+  
+  <style>
+    :root {
+      --primary: #0f2537;
+      --secondary: #e5d5be;
+      --bg-dark: #000000;
+      --card-bg: rgba(15, 37, 55, 0.6);
+      --text-light: #ffffff;
+      --text-muted: #a0aec0;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Tajawal', 'Plus Jakarta Sans', sans-serif;
+      background-color: var(--bg-dark);
+      color: var(--text-light);
+      min-height: 100vh;
+      overflow-x: hidden;
+      position: relative;
+    }
+
+    .bg-glow {
+      position: absolute;
+      top: -200px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 600px;
+      height: 600px;
+      background: radial-gradient(circle, rgba(15, 37, 55, 0.8) 0%, rgba(0, 0, 0, 0) 70%);
+      z-index: -1;
+      pointer-events: none;
+    }
+
+    /* تثبيت الشعار دائماً على اليسار */
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 20px 40px;
+      position: relative;
+      z-index: 100;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+      direction: ltr !important;
+    }
+
+    .logo-area {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      text-decoration: none;
+      color: var(--text-light);
+      font-weight: 700;
+      font-size: 20px;
+    }
+
+    .logo-area img {
+      width: 36px;
+      height: 36px;
+      object-fit: contain;
+      border-radius: 50%;
+    }
+
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+    }
+
+    .back-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 18px;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      border-radius: 50px;
+      color: var(--text-light);
+      text-decoration: none;
+      font-size: 14px;
+      font-weight: 600;
+      transition: all 0.3s ease;
+    }
+
+    .back-btn:hover {
+      background: var(--secondary);
+      color: var(--primary);
+      border-color: var(--secondary);
+    }
+
+    /* زر تغيير اللغة */
+    .lang-dropdown {
+      position: relative;
+      z-index: 999;
+    }
+
+    .lang-btn {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 16px;
+      border-radius: 50px;
+      background-color: var(--primary);
+      color: #ffffff;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      cursor: pointer;
+      font-family: inherit;
+      font-size: 14px;
+      font-weight: 600;
+      transition: all 0.3s ease;
+    }
+
+    .lang-btn:hover {
+      background-color: var(--secondary);
+      color: var(--primary);
+    }
+
+    .lang-menu {
+      position: absolute;
+      top: calc(100% + 8px);
+      left: 0;
+      background-color: #ffffff;
+      border-radius: 12px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
+      list-style: none;
+      padding: 6px 0;
+      margin: 0;
+      min-width: 140px;
+      display: none;
+      z-index: 9999;
+      overflow: hidden;
+      border: 1px solid rgba(0, 0, 0, 0.1);
+      text-align: left;
+    }
+
+    .lang-menu.show {
+      display: block;
+    }
+
+    .lang-menu li {
+      padding: 10px 16px;
+      color: #333333;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.2s ease, color 0.2s ease;
+    }
+
+    .lang-menu li:hover {
+      background-color: #f3f4f6;
+      color: var(--primary);
+    }
+
+    .lang-menu li.active {
+      color: var(--primary);
+      font-weight: 700;
+      background-color: #eef2f6;
+    }
+
+    .container {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 60px 20px;
+      position: relative;
+      z-index: 10;
+    }
+
+    .hero-section {
+      text-align: center;
+      margin-bottom: 60px;
+    }
+
+    .badge-tag {
+      display: inline-block;
+      padding: 6px 16px;
+      background: rgba(229, 213, 190, 0.1);
+      color: var(--secondary);
+      border-radius: 30px;
+      font-size: 13px;
+      font-weight: 600;
+      margin-bottom: 15px;
+      border: 1px solid rgba(229, 213, 190, 0.3);
+    }
+
+    .hero-section h1 {
+      font-size: 42px;
+      font-weight: 800;
+      margin-bottom: 20px;
+      background: linear-gradient(135deg, #ffffff 0%, #a0aec0 100%);
+      background-clip: text;
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .hero-section p {
+      font-size: 18px;
+      color: var(--text-muted);
+      max-width: 700px;
+      margin: 0 auto;
+      line-height: 1.6;
+    }
+
+    .features-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 25px;
+      margin-bottom: 60px;
+    }
+
+    .feature-card {
+      background: var(--card-bg);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 20px;
+      padding: 35px 30px;
+      backdrop-filter: blur(10px);
+      transition: transform 0.3s ease, border-color 0.3s ease;
+    }
+
+    .feature-card:hover {
+      transform: translateY(-5px);
+      border-color: rgba(229, 213, 190, 0.4);
+    }
+
+    .feature-icon {
+      width: 55px;
+      height: 55px;
+      background: rgba(229, 213, 190, 0.1);
+      border-radius: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--secondary);
+      font-size: 24px;
+      margin-bottom: 20px;
+    }
+
+    .feature-card h3 {
+      font-size: 20px;
+      font-weight: 700;
+      margin-bottom: 12px;
+      color: #fff;
+    }
+
+    .feature-card p {
+      font-size: 15px;
+      color: var(--text-muted);
+      line-height: 1.6;
+    }
+
+    .stats-section {
+      background: linear-gradient(135deg, rgba(15, 37, 55, 0.4) 0%, rgba(0,0,0,0.8) 100%);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 24px;
+      padding: 40px;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 30px;
+      text-align: center;
+      margin-bottom: 60px;
+    }
+
+    .stat-item h2 {
+      font-size: 36px;
+      font-weight: 800;
+      color: var(--secondary);
+      margin-bottom: 8px;
+    }
+
+    .stat-item p {
+      font-size: 14px;
+      color: var(--text-muted);
+      font-weight: 500;
+    }
+
+    .vision-mission {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+      gap: 30px;
+    }
+
+    .vm-box {
+      background: rgba(255, 255, 255, 0.02);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      border-radius: 20px;
+      padding: 35px;
+    }
+
+    .vm-box h3 {
+      font-size: 22px;
+      font-weight: 700;
+      margin-bottom: 15px;
+      color: var(--secondary);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .vm-box p {
+      font-size: 15px;
+      color: var(--text-muted);
+      line-height: 1.7;
+    }
+
+    footer {
+      text-align: center;
+      padding: 30px;
+      border-top: 1px solid rgba(255, 255, 255, 0.08);
+      color: var(--text-muted);
+      font-size: 14px;
+      margin-top: 40px;
+    }
+
+    @media (max-width: 768px) {
+      .hero-section h1 {
+        font-size: 32px;
+      }
+      header {
+        padding: 15px 20px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="bg-glow"></div>
+
+  <!-- Header -->
+  <header>
+    <!-- اللوكو يحافظ على نقل الـ slug تلقائياً -->
+    <a href="index.html" class="logo-area" id="logoLink">
+      <img src="images/logo1.png" alt="YRmenu Logo">
+      <span>YRmenu</span>
+    </a>
+    
+    <div class="header-actions">
+      <!-- Lang Dropdown -->
+      <div class="lang-dropdown">
+        <button class="lang-btn" id="langBtn" type="button">
+          <i class="fa-solid fa-globe"></i>
+          <span id="currentLangText">العربية</span>
+          <i class="fa-solid fa-chevron-down" style="font-size: 11px;"></i>
+        </button>
+        <ul class="lang-menu" id="langMenu">
+          <li data-lang="ar" id="opt-ar" class="active">العربية</li>
+          <li data-lang="en" id="opt-en">English</li>
+        </ul>
+      </div>
+
+      <!-- زر الرئيسية (Home) يحافظ على نقل الـ slug -->
+      <a href="index.html" class="back-btn" id="nav-back">
+        <i class="fa-solid fa-arrow-right" id="back-arrow"></i>
+        <span id="txt-back">الرئيسية</span>
+      </a>
+    </div>
+  </header>
+
+  <!-- Main Content -->
+  <div class="container">
+    
+    <!-- Hero Section -->
+    <div class="hero-section">
+      <span class="badge-tag" id="txt-badge">نظرة عامة على الشركة</span>
+      <h1 id="txt-title">ابتكار رقمي يعيد صياغة قطاع الضيافة</h1>
+      <p id="txt-desc">نحن في YRmenu نؤمن بأن تجربة العميل تبدأ من اللحظة الأولى. نهدف إلى تمكين المطاعم والمقاهي من التحول الرقمي الكامل من خلال قوائم طعام تفاعلية ذكية وسريعة.</p>
+    </div>
+
+    <!-- Stats -->
+    <div class="stats-section">
+      <div class="stat-item">
+        <h2 id="stat1-val">+0</h2>
+        <p id="txt-stat1">مطعم ومقاهي نشطة</p>
+      </div>
+      <div class="stat-item">
+        <h2 id="stat2-val">0.0%</h2>
+        <p id="txt-stat2">استقرار ووقت تشغيل الخدمة</p>
+      </div>
+      <div class="stat-item">
+        <h2>24/7</h2>
+        <p id="txt-stat3">دعم فني وتطوير مستمر</p>
+      </div>
+    </div>
+
+    <!-- Features Grid -->
+    <div class="features-grid">
+      <div class="feature-card">
+        <div class="feature-icon">
+          <i class="fa-solid fa-bolt"></i>
+        </div>
+        <h3 id="txt-feat1-title">سرعة فائقة وأداء عالي</h3>
+        <p id="txt-feat1-desc">تم تصميم منصتنا بعناية فائقة لتوفير تجربة تصفح سلسة وسريعة جداً للزوار دون أي تأخير أو استهلاك كبير للبيانات.</p>
+      </div>
+
+      <div class="feature-card">
+        <div class="feature-icon">
+          <i class="fa-solid fa-sliders"></i>
+        </div>
+        <h3 id="txt-feat2-title">لوحة تحكم مرنة وشاملة</h3>
+        <p id="txt-feat2-desc">تحكم كامل بإدارة الأقسام، الأطباق، الأسعار، الفيديوهات الخلفية، وروابط وسائل التواصل الاجتماعي بكل سهولة وآنياً.</p>
+      </div>
+
+      <div class="feature-card">
+        <div class="feature-icon">
+          <i class="fa-solid fa-globe"></i>
+        </div>
+        <h3 id="txt-feat3-title">دعم متعدد اللغات</h3>
+        <p id="txt-feat3-desc">تتيح المنصة للعملاء التبديل السلس بين اللغة العربية والإنجليزية لخدمة أوسع شريحة ممكنة من الزوار والسياح.</p>
+      </div>
+    </div>
+
+    <!-- Vision & Mission -->
+    <div class="vision-mission">
+      <div class="vm-box">
+        <h3><i class="fa-solid fa-eye"></i> <span id="txt-vision-title">رؤيتنا</span></h3>
+        <p id="txt-vision-desc">أن نكون المنصة الرائدة والأولى في المنطقة لتقديم حلول القوائم الرقمية الذكية، والمساهمة الفعالة في تطوير القطاع السياحي والغذائي عبر تقنيات حديثة ومبتكرة.</p>
+      </div>
+      <div class="vm-box">
+        <h3><i class="fa-solid fa-bullseye"></i> <span id="txt-mission-title">رسالتنا</span></h3>
+        <p id="txt-mission-desc">تسهيل التواصل بين المطاعم وعملائهم عبر تقنيات رقمية أنيقة، موثوقة، وسهلة الاستخدام، مع الالتزام بأعلى معايير الجودة والاحترافية في الدعم الفني.</p>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Footer -->
+  <footer>
+    <p id="txt-footer">&copy; 2026 YRmenu. جميع الحقوق محفوظة.</p>
+  </footer>
+
+  <!-- JavaScript -->
+  <script>
+    const translations = {
+      ar: {
+        back: "الرئيسية",
+        badge: "نظرة عامة على الشركة",
+        title: "ابتكار رقمي يعيد صياغة قطاع الضيافة",
+        desc: "نحن في YRmenu نؤمن بأن تجربة العميل تبدأ من اللحظة الأولى. نهدف إلى تمكين المطاعم والمقاهي من التحول الرقمي الكامل من خلال قوائم طعام تفاعلية ذكية وسريعة.",
+        stat1: "مطعم ومقاهي نشطة",
+        stat2: "استقرار ووقت تشغيل الخدمة",
+        stat3: "دعم فني وتطوير مستمر",
+        feat1Title: "سرعة فائقة وأداء عالي",
+        feat1Desc: "تم تصميم منصتنا بعناية فائقة لتوفير تجربة تصفح سلسة وسريعة جداً للزوار دون أي تأخير أو استهلاك كبير للبيانات.",
+        feat2Title: "لوحة تحكم مرنة وشاملة",
+        feat2Desc: "تحكم كامل بإدارة الأقسام، الأطباق، الأسعار، الفيديوهات الخلفية، وروابط وسائل التواصل الاجتماعي بكل سهولة وآنياً.",
+        feat3Title: "دعم متعدد اللغات",
+        feat3Desc: "تتيح المنصة للعملاء التبديل السلس بين اللغة العربية والإنجليزية لخدمة أوسع شريحة ممكنة من الزوار والسياح.",
+        visionTitle: "رؤيتنا",
+        visionDesc: "أن نكون المنصة الرائدة والأولى في المنطقة لتقديم حلول القوائم الرقمية الذكية، والمساهمة الفعالة في تطوير القطاع السياحي والغذائي عبر تقنيات حديثة ومبتكرة.",
+        missionTitle: "رسالتنا",
+        missionDesc: "تسهيل التواصل بين المطاعم وعملائهم عبر تقنيات رقمية أنيقة، موثوقة، وسهلة الاستخدام، مع الالتزام بأعلى معايير الجودة والاحترافية في الدعم الفني.",
+        footer: "&copy; 2026 YRmenu. جميع الحقوق محفوظة.",
+        arrowDir: "fa-arrow-right"
+      },
+      en: {
+        back: "Home",
+        badge: "Company Overview",
+        title: "Digital Innovation Reshaping Hospitality",
+        desc: "At YRmenu, we believe customer experience starts from the very first moment. We aim to empower restaurants and cafes with full digital transformation through smart, fast, interactive menus.",
+        stat1: "Active Restaurants & Cafes",
+        stat2: "Uptime & Reliability",
+        stat3: "24/7 Support & Updates",
+        feat1Title: "Lightning Fast & High Performance",
+        feat1Desc: "Our platform is carefully engineered to deliver a seamless and ultra-fast browsing experience for visitors without any lag or high data usage.",
+        feat2Title: "Flexible & Comprehensive Admin Panel",
+        feat2Desc: "Complete control over managing categories, dishes, prices, background videos, and social media links instantly and easily.",
+        feat3Title: "Multi-language Support",
+        feat3Desc: "The platform enables customers to switch seamlessly between Arabic and English to serve the widest possible range of visitors and tourists.",
+        visionTitle: "Our Vision",
+        visionDesc: "To be the leading and premier platform in the region for smart digital menu solutions, actively contributing to the development of the tourism and culinary sector through innovative technologies.",
+        missionTitle: "Our Mission",
+        missionDesc: "Facilitating communication between restaurants and their customers via elegant, reliable, and user-friendly digital technologies, committed to the highest standards of quality and professional support.",
+        footer: "&copy; 2026 YRmenu. All rights reserved.",
+        arrowDir: "fa-arrow-left"
+      }
+    };
+
+    // التقاط الـ store slug من الرابط الحالي (سواء عبر Query Parameters مثل ?store=xyz أو Path مثل /xyz)
+    function getStoreSlug() {
+      const urlParams = new URLSearchParams(window.location.search);
+      // فحص إذا كان موجوداً كـ Query Parameter مثل ?store=restaurant-name أو ?slug=...
+      let store = urlParams.get('store') || urlParams.get('slug');
+      
+      if (!store) {
+        // إذا كان النظام يستعمل مسارات URL (مثل /store-name/overview.html)
+        const pathSegments = window.location.pathname.split('/').filter(Boolean);
+        if (pathSegments.length > 1 && pathSegments[pathSegments.length - 1].includes('overview')) {
+          store = pathSegments[pathSegments.length - 2];
+        }
+      }
+      return store;
+    }
+
+    // تحديث روابط التنقل لتتضمن الـ store دائماً
+    function setupLinks() {
+      const storeSlug = getStoreSlug();
+      if (storeSlug) {
+        const homeUrl = `index.html?store=${encodeURIComponent(storeSlug)}`;
+        document.getElementById('logoLink').setAttribute('href', homeUrl);
+        document.getElementById('nav-back').setAttribute('href', homeUrl);
+      }
+    }
+
+    function runCounters() {
+      const stat1El = document.getElementById('stat1-val');
+      let current1 = 0;
+      const target1 = 100;
+      const duration1 = 1500;
+      const stepTime1 = Math.abs(Math.floor(duration1 / target1));
+      
+      const timer1 = setInterval(() => {
+        current1 += 2;
+        if (current1 >= target1) {
+          current1 = target1;
+          clearInterval(timer1);
+        }
+        stat1El.innerText = "+" + current1;
+      }, stepTime1);
+
+      const stat2El = document.getElementById('stat2-val');
+      let current2 = 0;
+      const target2 = 99.9;
+      const duration2 = 1500;
+      const steps2 = 50;
+      const increment2 = target2 / steps2;
+      const stepTime2 = duration2 / steps2;
+
+      const timer2 = setInterval(() => {
+        current2 += increment2;
+        if (current2 >= target2) {
+          current2 = target2;
+          clearInterval(timer2);
+        }
+        stat2El.innerText = current2.toFixed(1) + "%";
+      }, stepTime2);
+    }
+
+    function applyLanguage(lang) {
+      const htmlEl = document.documentElement;
+      const currentLangText = document.getElementById('currentLangText');
+      const optAr = document.getElementById('opt-ar');
+      const optEn = document.getElementById('opt-en');
+      const t = translations[lang];
+
+      if (lang === 'en') {
+        htmlEl.setAttribute('dir', 'ltr');
+        htmlEl.setAttribute('lang', 'en');
+        if (currentLangText) currentLangText.innerText = 'English';
+        if (optAr) optAr.classList.remove('active');
+        if (optEn) optEn.classList.add('active');
+      } else {
+        htmlEl.setAttribute('dir', 'rtl');
+        htmlEl.setAttribute('lang', 'ar');
+        if (currentLangText) currentLangText.innerText = 'العربية';
+        if (optEn) optEn.classList.remove('active');
+        if (optAr) optAr.classList.add('active');
+      }
+
+      document.getElementById('txt-back').innerText = t.back;
+      document.getElementById('txt-badge').innerText = t.badge;
+      document.getElementById('txt-title').innerText = t.title;
+      document.getElementById('txt-desc').innerText = t.desc;
+      document.getElementById('txt-stat1').innerText = t.stat1;
+      document.getElementById('txt-stat2').innerText = t.stat2;
+      document.getElementById('txt-stat3').innerText = t.stat3;
+      document.getElementById('txt-feat1-title').innerText = t.feat1Title;
+      document.getElementById('txt-feat1-desc').innerText = t.feat1Desc;
+      document.getElementById('txt-feat2-title').innerText = t.feat2Title;
+      document.getElementById('txt-feat2-desc').innerText = t.feat2Desc;
+      document.getElementById('txt-feat3-title').innerText = t.feat3Title;
+      document.getElementById('txt-feat3-desc').innerText = t.feat3Desc;
+      document.getElementById('txt-vision-title').innerText = t.visionTitle;
+      document.getElementById('txt-vision-desc').innerText = t.visionDesc;
+      document.getElementById('txt-mission-title').innerText = t.missionTitle;
+      document.getElementById('txt-mission-desc').innerText = t.missionDesc;
+      document.getElementById('txt-footer').innerHTML = t.footer;
+
+      const backArrow = document.getElementById('back-arrow');
+      if (backArrow) {
+        backArrow.className = `fa-solid ${t.arrowDir}`;
+      }
+
+      localStorage.setItem('selectedLang', lang);
+    }
+
+    const langBtn = document.getElementById('langBtn');
+    const langMenu = document.getElementById('langMenu');
+
+    function toggleMenu(e) {
+      if (e) {
+        e.preventDefault();
+        e.stopPropagation();
+      }
+      langMenu.classList.toggle('show');
+    }
+
+    if (langBtn && langMenu) {
+      langBtn.addEventListener('click', toggleMenu);
+
+      langMenu.querySelectorAll('li').forEach(item => {
+        item.addEventListener('click', (e) => {
+          e.stopPropagation();
+          const selectedLang = e.currentTarget.getAttribute('data-lang');
+          applyLanguage(selectedLang);
+          langMenu.classList.remove('show');
+        });
+      });
+
+      document.addEventListener('click', (e) => {
+        if (!langBtn.contains(e.target) && !langMenu.contains(e.target)) {
+          langMenu.classList.remove('show');
+        }
+      });
+    }
+
+    window.addEventListener('DOMContentLoaded', () => {
+      const savedLang = localStorage.getItem('selectedLang') || 'ar';
+      applyLanguage(savedLang);
+      setupLinks(); // ربط الـ slug وزر الرئيسية والشعار
+      runCounters(); // تشغيل حركة تصاعد الأرقام
+    });
+  </script>
+</body>
+</html>
