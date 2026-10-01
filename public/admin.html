@@ -132,7 +132,7 @@
       </div>
 
       <!-- قسم وسائل التواصل الاجتماعي مع تحكم منفصل لكل أيقونة -->
-      <h4 style="margin-top: 20px; border-top: 1px dashed #ddd; padding-top:social-section-title">🔗 وسائل التواصل الاجتماعي والأيقونات الخاصة بها</h4>
+      <h4 id="social-section-title" style="margin-top: 20px; border-top: 1px dashed #ddd; padding-top: 15px;">🔗 وسائل التواصل الاجتماعي والأيقونات الخاصة بها</h4>
       <div class="form-grid" style="grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));">
         
         <!-- Facebook -->
@@ -367,47 +367,59 @@
     }
   };
 
+  // دالة آمنة لتحديث النصوص لتجنب أخطاء null
+  function setSafeText(id, text) {
+    const el = document.getElementById(id);
+    if (el) el.innerText = text;
+  }
+
+  function setSafePlaceholder(id, text) {
+    const el = document.getElementById(id);
+    if (el) el.placeholder = text;
+  }
+
   function applyAdminTranslations() {
     const lang = localStorage.getItem('menu_language') || 'ar';
     const t = adminTranslations[lang];
+    if (!t) return;
 
-    document.getElementById('admin-title').innerText = t.adminTitle;
-    document.getElementById('logout-btn').innerText = t.logout;
-    document.getElementById('sub-management-title').innerText = t.subManagementTitle;
-    document.getElementById('label-expiry').innerText = t.labelExpiry;
-    document.getElementById('label-sub-status').innerText = t.labelSubStatus;
-    document.getElementById('opt-active').innerText = t.optActive;
-    document.getElementById('opt-disabled').innerText = t.optDisabled;
-    document.getElementById('btn-save-sub').innerText = t.btnSaveSub;
-    document.getElementById('theme-custom-title').innerText = t.themeCustomTitle;
-    document.getElementById('social-section-title').innerText = t.socialSectionTitle;
-    document.getElementById('label-res-name').innerText = t.labelResName;
-    document.getElementById('label-tagline').innerText = t.labelTagline;
-    document.getElementById('label-facebook').innerText = t.labelFacebook;
-    document.getElementById('label-instagram').innerText = t.labelInstagram;
-    document.getElementById('label-snapchat').innerText = t.labelSnapchat;
-    document.getElementById('label-whatsapp').innerText = t.labelWhatsapp;
-    document.getElementById('label-welcome-text').innerText = t.labelWelcomeText;
-    document.getElementById('label-welcome-text-en').innerText = t.labelWelcomeTextEn;
-    document.getElementById('label-sub-title').innerText = t.labelSubTitle;
-    document.getElementById('label-sub-title-en').innerText = t.labelSubTitleEn;
-    document.getElementById('label-primary-color').innerText = t.labelPrimaryColor;
-    document.getElementById('label-sec-color').innerText = t.labelSecColor;
-    document.getElementById('label-card-bg').innerText = t.labelCardBg;
-    document.getElementById('label-text-color').innerText = t.labelTextColor;
-    document.getElementById('label-heading-color').innerText = t.labelHeadingColor;
-    document.getElementById('label-brand-color').innerText = t.labelBrandColor;
-    document.getElementById('label-desc-color').innerText = t.labelDescColor;
-    document.getElementById('label-cat-bg-color').innerText = t.labelCatBgColor;
-    document.getElementById('label-logo').innerText = t.labelLogo;
-    document.getElementById('label-banner').innerText = t.labelBanner;
-    document.getElementById('label-hero-bg').innerText = t.labelHeroBg;
-    document.getElementById('label-hero-video').innerText = t.labelHeroVideo;
-    document.getElementById('btn-save-theme').innerText = t.btnSaveTheme;
-    document.getElementById('add-cat-title').innerText = t.addCatTitle;
-    document.getElementById('cat-ar').placeholder = t.catArPlaceholder;
-    document.getElementById('cat-en').placeholder = t.catEnPlaceholder;
-    document.getElementById('btn-add-cat').innerText = t.btnAddCat;
+    setSafeText('admin-title', t.adminTitle);
+    setSafeText('logout-btn', t.logout);
+    setSafeText('sub-management-title', t.subManagementTitle);
+    setSafeText('label-expiry', t.labelExpiry);
+    setSafeText('label-sub-status', t.labelSubStatus);
+    setSafeText('opt-active', t.optActive);
+    setSafeText('opt-disabled', t.optDisabled);
+    setSafeText('btn-save-sub', t.btnSaveSub);
+    setSafeText('theme-custom-title', t.themeCustomTitle);
+    setSafeText('social-section-title', t.socialSectionTitle);
+    setSafeText('label-res-name', t.labelResName);
+    setSafeText('label-tagline', t.labelTagline);
+    setSafeText('label-facebook', t.labelFacebook);
+    setSafeText('label-instagram', t.labelInstagram);
+    setSafeText('label-snapchat', t.labelSnapchat);
+    setSafeText('label-whatsapp', t.labelWhatsapp);
+    setSafeText('label-welcome-text', t.labelWelcomeText);
+    setSafeText('label-welcome-text-en', t.labelWelcomeTextEn);
+    setSafeText('label-sub-title', t.labelSubTitle);
+    setSafeText('label-sub-title-en', t.labelSubTitleEn);
+    setSafeText('label-primary-color', t.labelPrimaryColor);
+    setSafeText('label-sec-color', t.labelSecColor);
+    setSafeText('label-card-bg', t.labelCardBg);
+    setSafeText('label-text-color', t.labelTextColor);
+    setSafeText('label-heading-color', t.labelHeadingColor);
+    setSafeText('label-brand-color', t.labelBrandColor);
+    setSafeText('label-desc-color', t.labelDescColor);
+    setSafeText('label-cat-bg-color', t.labelCatBgColor);
+    setSafeText('label-logo', t.labelLogo);
+    setSafeText('label-banner', t.labelBanner);
+    setSafeText('label-hero-bg', t.labelHeroBg);
+    setSafeText('label-hero-video', t.labelHeroVideo);
+    setSafeText('btn-save-theme', t.btnSaveTheme);
+    setSafeText('add-cat-title', t.addCatTitle);
+    setSafePlaceholder('cat-ar', t.catArPlaceholder);
+    setSafePlaceholder('cat-en', t.catEnPlaceholder);
+    setSafeText('btn-add-cat', t.btnAddCat);
   }
 
   function toggleLanguage() {
@@ -455,13 +467,11 @@
           document.getElementById('telegram-chat-id').value = settings.telegramChatId;
         }
 
-        // تعبئة روابط وسائل التواصل
         document.getElementById('social-facebook').value = settings.facebook || '';
         document.getElementById('social-instagram').value = settings.instagram || '';
         document.getElementById('social-snapchat').value = settings.snapchat || '';
         document.getElementById('social-whatsapp').value = settings.whatsapp || '';
 
-        // عرض أيقونات السوشيال ميديا مع زر الحذف إن وجدت
         renderSocialIconPreview('facebook', settings.facebookIconUrl);
         renderSocialIconPreview('instagram', settings.instagramIconUrl);
         renderSocialIconPreview('snapchat', settings.snapchatIconUrl);
@@ -516,6 +526,7 @@
 
   function renderSocialIconPreview(platform, url) {
     const container = document.getElementById(`${platform}-icon-container`);
+    if (!container) return;
     const lang = localStorage.getItem('menu_language') || 'ar';
     if (url) {
       container.innerHTML = `
@@ -546,13 +557,11 @@
     formData.append('telegramBotToken', document.getElementById('telegram-bot-token').value);
     formData.append('telegramChatId', document.getElementById('telegram-chat-id').value);
 
-    // إرسال روابط وسائل التواصل الاجتماعي
     formData.append('facebook', document.getElementById('social-facebook').value);
     formData.append('instagram', document.getElementById('social-instagram').value);
     formData.append('snapchat', document.getElementById('social-snapchat').value);
     formData.append('whatsapp', document.getElementById('social-whatsapp').value);
 
-    // إرسال ملفات الأيقونات إن وجدت
     const fbIcon = document.getElementById('facebook-icon-file').files[0];
     const igIcon = document.getElementById('instagram-icon-file').files[0];
     const scIcon = document.getElementById('snapchat-icon-file').files[0];
@@ -625,6 +634,7 @@
       if (!res.ok) throw new Error('فشل جلب البيانات');
       const categories = await res.json();
       const container = document.getElementById('dashboard-content');
+      if (!container) return;
       container.innerHTML = '';
       const lang = localStorage.getItem('menu_language') || 'ar';
       const t = adminTranslations[lang];
@@ -785,7 +795,7 @@
   async function addItem(catId) {
     const formData = new FormData();
     formData.append('name', document.getElementById(`new-item-ar-${catId}`).value);
-    formData.append('name_en', document.getElementById(`new-item-en-${catId}` ).value);
+    formData.append('name_en', document.getElementById(`new-item-en-${catId}`).value);
     formData.append('price', document.getElementById(`new-item-price-${catId}`).value);
     formData.append('description', document.getElementById(`new-item-desc-${catId}`).value);
     formData.append('description_en', document.getElementById(`new-item-desc-en-${catId}`).value);
